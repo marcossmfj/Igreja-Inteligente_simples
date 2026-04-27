@@ -29,15 +29,33 @@ export async function createChurchFromMaster(formData: FormData) {
 
     if (authError) {
       if (authError.message.includes('already') || authError.status === 422) {
-        console.log('Usuário já existe, buscando ID...')
-        const { data: existingUser, error: searchError } = await supabaseAdmin
+        console.log('Usuário já existe no Auth, buscando ou criando perfil...')
+        
+        // Busca o perfil de forma segura (maybeSingle não dá erro se não achar nada)
+        const { data: existingProfile, error: searchError } = await supabaseAdmin
           .from('profiles')
           .select('id')
           .eq('email', adminEmail)
-          .single()
+          .maybeSingle()
         
-        if (searchError) return { error: 'Erro ao buscar usuário existente: ' + searchError.message }
-        userId = existingUser?.id
+        if (searchError) return { error: 'Erro ao buscar perfil: ' + searchError.message }
+
+        if (existingProfile) {
+          userId = existingProfile.id
+        } else {
+          // CASO ESPECIAL: Usuário existe no Auth mas não no Profiles
+          // Vamos tentar buscar o ID dele no Auth para criar o perfil
+          const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+          const authUserRecord = users.find(u => u.email === adminEmail)
+          
+          if (listError || !authUserRecord) {
+            return { error: 'Usuário existe mas seu perfil está inacessível. Tente usar outro e-mail.' }
+          }
+          
+          userId = authUserRecord.id
+          // Cria o perfil faltante
+          await supabaseAdmin.from('profiles').insert({ id: userId, email: adminEmail })
+        }
       } else {
         return { error: 'Erro no Auth: ' + authError.message }
       }
