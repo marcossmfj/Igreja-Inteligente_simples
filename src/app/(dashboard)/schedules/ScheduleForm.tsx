@@ -162,7 +162,9 @@ export function ScheduleForm({
             )}
           </div>
 
-          <Button type="submit" className="w-full">Agendar na Escala</Button>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Agendando...' : 'Agendar na Escala'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

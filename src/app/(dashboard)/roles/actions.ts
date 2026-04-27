@@ -26,6 +26,18 @@ export async function addRole(formData: FormData) {
       return { error: 'Seu usuário não está vinculado a nenhuma igreja. Verifique o Painel Master.' }
     }
 
+    // Validar se já existe um cargo com o mesmo nome nesta igreja
+    const { data: existingRole } = await supabase
+      .from('roles')
+      .select('id')
+      .ilike('name', name)
+      .eq('church_id', profile.church_id)
+      .maybeSingle()
+
+    if (existingRole) {
+      return { error: 'Já existe um cargo com este nome nesta igreja.' }
+    }
+
     const { error } = await supabase.from('roles').insert({ 
       name, 
       church_id: profile.church_id 

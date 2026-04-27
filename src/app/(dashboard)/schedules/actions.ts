@@ -30,6 +30,20 @@ export async function addSchedule(formData: FormData) {
       return { error: 'Seu usuário não está vinculado a nenhuma igreja. Verifique o Painel Master.' }
     }
 
+    // Validar se o membro já está escalado para este evento na mesma data
+    const { data: existingSchedule } = await supabase
+      .from('schedules')
+      .select('id')
+      .eq('date', date)
+      .eq('event_name', event_name || 'Culto')
+      .eq('member_id', member_id)
+      .eq('church_id', profile.church_id)
+      .maybeSingle()
+
+    if (existingSchedule) {
+      return { error: 'Este membro já está escalado para este evento nesta data.' }
+    }
+
     const { error } = await supabase.from('schedules').insert({ 
       date, 
       event_name: event_name || 'Culto',
