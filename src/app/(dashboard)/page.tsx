@@ -4,6 +4,7 @@ import { Users, Users2, CalendarDays, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 async function createChurch(formData: FormData) {
   'use server'
@@ -72,9 +73,13 @@ export default async function DashboardPage() {
             Sua conta ainda não está vinculada a nenhuma igreja. Por favor, entre em contato com o administrador do sistema para solicitar seu acesso.
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <a href="https://wa.me/5511999999999" target="_blank">Falar com Suporte</a>
-        </Button>
+        <Link 
+          href="https://wa.me/5511999999999" 
+          target="_blank"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+        >
+          Falar com Suporte
+        </Link>
       </div>
     )
   }
