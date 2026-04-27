@@ -75,17 +75,19 @@ export function MemberForm({
       setOpen(isOpen)
       if (!isOpen) setError(null)
     }}>
-      <DialogTrigger asChild>
-        {isEditing ? (
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-900 transition-all">
-            <Pencil className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-            <Plus className="mr-2 h-5 w-5" /> Novo Membro
-          </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          isEditing ? (
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-900 transition-all">
+              <Pencil className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+              <Plus className="mr-2 h-5 w-5" /> Novo Membro
+            </Button>
+          )
+        }
+      />
       <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
         <DialogHeader className="p-8 pb-0">
           <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">

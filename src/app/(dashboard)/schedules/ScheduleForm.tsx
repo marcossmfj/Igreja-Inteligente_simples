@@ -58,11 +58,13 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
         setSelectedSkill('')
       }
     }}>
-      <DialogTrigger asChild>
-        <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-          <Plus className="mr-2 h-5 w-5" /> Nova Escala
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+            <Plus className="mr-2 h-5 w-5" /> Nova Escala
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
         <DialogHeader className="p-8 pb-0">
           <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">Organizar Escala</DialogTitle>
