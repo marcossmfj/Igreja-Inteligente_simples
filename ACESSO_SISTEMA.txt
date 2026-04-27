@@ -1,0 +1,52 @@
+====================================================
+   IGREJA INTELIGENTE - LINKS E ACESSOS RÁPIDOS
+====================================================
+
+1. SISTEMA ONLINE (Produção)
+----------------------------------------------------
+Link: https://igreja-inteligente-simples.vercel.app/login
+O que faz: Este é o seu sistema em funcionamento. É aqui que 
+os usuários finais (pastores e administradores) fazem login, 
+cadastram membros e gerenciam as escalas.
+
+2. PAINEL DO BANCO DE DADOS E AUTH (Supabase)
+----------------------------------------------------
+Link: https://supabase.com/dashboard/project/dayploxicrqovjpiryqf
+O que faz: 
+- Gerenciar Usuários: Na aba 'Authentication', você cria novos 
+  logins para quem vai administrar o sistema.
+- SQL Editor: Onde você roda os comandos para criar ou alterar 
+  tabelas no banco de dados.
+- Table Editor: Onde você pode ver e editar os dados brutos 
+  (membros, igrejas, etc) diretamente no banco.
+
+3. PAINEL DE HOSPEDAGEM (Vercel)
+----------------------------------------------------
+Link: https://vercel.com/marcossmfjs-projects/igreja-inteligente-simples
+O que faz: Gerencia a publicação do site. Sempre que o código 
+for atualizado no GitHub, a Vercel atualiza o site automaticamente.
+
+4. CÓDIGO FONTE (GitHub)
+----------------------------------------------------
+Link: https://github.com/marcossmfj/Igreja-Inteligente_simples
+O que faz: Repositório onde o código do sistema está guardado.
+
+====================================================
+COMO O SISTEMA FUNCIONA (FLUXO DO USUÁRIO)
+====================================================
+
+1. CADASTRO: O dono do sistema cria o usuário no Supabase.
+2. PRIMEIRO ACESSO: O usuário loga no sistema e, se não tiver 
+   uma igreja, o sistema pede para ele criar uma (Multi-tenant).
+3. CONFIGURAÇÃO: A igreja cadastra seus 'Cargos' (ex: Pastor, 
+   Membro) e suas 'Skills' (ex: Guitarrista, Pregador).
+4. MEMBROS: Cadastra as pessoas e vincula às suas habilidades.
+5. ESCALA: Ao criar uma escala, o sistema filtra apenas as 
+   pessoas que têm a habilidade necessária para o cargo, 
+   evitando erros de agendamento.
+6. VISITANTES: Registra visitantes e gera um link para mandar 
+   mensagem de boas-vindas via WhatsApp com um clique.
+
+====================================================
+ESTADO DO PROJETO: CONCLUÍDO E ONLINE 🚀
+====================================================
