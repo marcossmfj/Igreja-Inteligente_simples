@@ -1,10 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { deleteSkill } from './actions'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Trash2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Trash2, Zap, Search } from 'lucide-react'
 import { SkillForm } from './SkillForm'
+import { Badge } from '@/components/ui/badge'
 
 export default async function SkillsPage() {
   const supabase = await createClient()
@@ -15,53 +14,70 @@ export default async function SkillsPage() {
     .order('name')
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Habilidades</h2>
-          <p className="text-muted-foreground">
-            Gerencie as habilidades (skills) para as escalas.
-          </p>
+    <div className="max-w-4xl mx-auto space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4 md:px-0">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-5xl font-black tracking-tighter text-slate-900 leading-none">Habilidades</h2>
+          <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em]">Competências Técnicas</p>
         </div>
         <SkillForm />
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {skills?.map((skill) => (
-                <TableRow key={skill.id}>
-                  <TableCell className="font-medium">{skill.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <SkillForm skill={skill} />
-                      <form action={deleteSkill.bind(null, skill.id)}>
-                        <Button variant="ghost" size="icon" type="submit">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </form>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {skills?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
-                    Nenhuma habilidade cadastrada.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="font-black text-slate-900 tracking-tight text-xl">Skills Cadastradas</h3>
+          <Badge variant="outline" className="rounded-lg bg-slate-50 text-[10px] font-bold border-slate-100 uppercase tracking-widest px-3 py-1">
+            {skills?.length} registros
+          </Badge>
+        </div>
+
+        <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-50 bg-slate-50/50">
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Nome da Habilidade</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {skills?.map((skill) => (
+                    <tr key={skill.id} className="group hover:bg-slate-50/50 transition-all duration-300">
+                      <td className="px-10 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors shrink-0">
+                            <Zap className="h-5 w-5" />
+                          </div>
+                          <span className="font-black text-slate-900 text-base">{skill.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-10 py-6 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <SkillForm skill={skill} />
+                          <form action={deleteSkill.bind(null, skill.id)}>
+                            <button type="submit" className="h-10 w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {skills?.length === 0 && (
+              <div className="py-20 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-slate-50 mb-4">
+                  <Search className="h-8 w-8 text-slate-200" />
+                </div>
+                <p className="text-slate-400 font-bold">Nenhuma habilidade encontrada</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
