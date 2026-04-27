@@ -3,9 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, Mail, AlertCircle } from 'lucide-react'
+import { Building2, Mail, AlertCircle, LogOut } from 'lucide-react'
 import { createChurchFromMaster } from './actions'
 import { useState } from 'react'
+import { logout } from '@/app/login/actions'
 
 export default function MasterPanelClient({ churches }: { churches: any[] }) {
   const [error, setError] = useState<string | null>(null)
@@ -28,9 +29,14 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold">Painel Master</h1>
-        <p className="text-muted-foreground">Gerenciamento global de igrejas e acessos.</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-4xl font-bold">Painel Master</h1>
+          <p className="text-muted-foreground">Gerenciamento global de igrejas e acessos.</p>
+        </div>
+        <Button variant="ghost" onClick={() => logout()} className="text-muted-foreground hover:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" /> Sair
+        </Button>
       </div>
 
       <div className="grid gap-8 md:grid-cols-[400px_1fr]">
