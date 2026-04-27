@@ -29,6 +29,8 @@ interface Member {
 export function ScheduleForm({ skills, members }: { skills: Skill[], members: Member[] }) {
   const [open, setOpen] = useState(false)
   const [selectedSkill, setSelectedSkill] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   // Filtrar membros que possuem a skill selecionada
   const filteredMembers = useMemo(() => {
@@ -39,7 +41,10 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
   }, [selectedSkill, members])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => {
+      setOpen(val)
+      if (!val) setError(null)
+    }}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-2 h-4 w-4" /> Criar Escala
       </DialogTrigger>
@@ -50,10 +55,25 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
             Selecione a função e o sistema mostrará apenas os membros qualificados.
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md border border-destructive/20 font-medium mb-4">
+            {error}
+          </div>
+        )}
+
         <form action={async (formData) => {
-          await addSchedule(formData)
-          setOpen(false)
-          setSelectedSkill('')
+          setLoading(true)
+          setError(null)
+          const result = await addSchedule(formData)
+          setLoading(false)
+          
+          if (result?.error) {
+            setError(result.error)
+          } else {
+            setOpen(false)
+            setSelectedSkill('')
+          }
         }} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="event_name">Nome do Culto / Evento</Label>
