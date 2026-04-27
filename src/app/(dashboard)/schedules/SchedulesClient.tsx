@@ -36,15 +36,16 @@ const skillColors: Record<string, string> = {
 export function SchedulesClient({ groupedSchedules }: { groupedSchedules: GroupedSchedules }) {
   const [sentNotifications, setSentNotifications] = useState<Set<string>>(new Set())
 
-  const handleNotify = (id: string, whatsappUrl: string) => {
-    window.open(whatsappUrl, '_blank')
+  const handleWhatsAppClick = (id: string, phone: string, name: string, role: string, date: string) => {
+    const msg = encodeURIComponent(`Olá ${name}, você está escalado para ${role} no dia ${date}. Confirma?`);
+    window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
     setSentNotifications(prev => new Set(prev).add(id))
-  }
+  };
 
   const dates = Object.values(groupedSchedules).sort((a, b) => a.date.localeCompare(b.date))
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 animate-in fade-in duration-700">
       {dates.map((dateGroup) => (
         <div key={dateGroup.date} className="space-y-6">
           <div className="flex items-center gap-4 px-4 md:px-0">
@@ -73,10 +74,8 @@ export function SchedulesClient({ groupedSchedules }: { groupedSchedules: Groupe
                   {items.map((item) => {
                     const colorClass = skillColors[item.skills?.name || ''] || 'bg-slate-100 text-slate-500'
                     const isSent = sentNotifications.has(item.id)
-                    
-                    const cleanPhone = item.members?.phone?.replace(/\D/g, '') || ''
-                    const message = `Olá *${item.members?.name}*, você está escalado para *${eventName}* no dia *${new Date(dateGroup.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}* na função de *${item.skills?.name || 'Auxiliar'}*. Confirma presença?`
-                    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`
+                    const formattedDate = new Date(dateGroup.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+                    const roleName = item.skills?.name || 'Auxiliar'
 
                     return (
                       <div key={item.id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 md:px-10 hover:bg-slate-50/50 transition-all duration-300 gap-6">
@@ -90,7 +89,7 @@ export function SchedulesClient({ groupedSchedules }: { groupedSchedules: Groupe
                             </p>
                             <div className="flex items-center gap-3">
                               <Badge className={cn("rounded-lg px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest border-none shadow-none", colorClass)}>
-                                {item.skills?.name || 'Auxiliar'}
+                                {roleName}
                               </Badge>
                               {item.members?.phone && (
                                 <span className="text-xs text-slate-300 font-bold tracking-tight">
@@ -104,7 +103,13 @@ export function SchedulesClient({ groupedSchedules }: { groupedSchedules: Groupe
                         <div className="flex items-center gap-3 self-end md:self-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                           {item.members?.phone && (
                             <Button
-                              onClick={() => handleNotify(item.id, whatsappUrl)}
+                              onClick={() => handleWhatsAppClick(
+                                item.id, 
+                                item.members?.phone || '', 
+                                item.members?.name || '', 
+                                roleName, 
+                                formattedDate
+                              )}
                               className={cn(
                                 "flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl",
                                 isSent 
