@@ -9,23 +9,38 @@ export async function createChurchFromMaster(formData: FormData) {
   const adminEmail = formData.get('adminEmail') as string
   const adminPassword = formData.get('adminPassword') as string
   
-  const supabase = await createClient()
   const supabaseAdmin = createAdminClient()
 
-  // 1. Criar o usuário no Auth (sem precisar confirmar e-mail)
+  // 1. Tentar criar o usuário ou buscar se já existe
   const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email: adminEmail,
     password: adminPassword,
     email_confirm: true
   })
 
-  if (authError) {
-    console.error('Erro ao criar usuário no Auth:', authError.message)
+  let userId = authUser?.user?.id
+
+  // Se o erro for que o usuário já existe, vamos buscar o ID dele
+  if (authError && authError.message.includes('already registered')) {
+    const { data: existingUser } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('email', adminEmail)
+      .single()
+    
+    userId = existingUser?.id
+  } else if (authError) {
+    console.error('Erro no Auth:', authError.message)
+    return
+  }
+
+  if (!userId) {
+    console.error('Não foi possível obter o ID do usuário')
     return
   }
 
   // 2. Criar a igreja
-  const { data: church, error: churchError } = await supabase
+  const { data: church, error: churchError } = await supabaseAdmin
     .from('churches')
     .insert({ name: churchName })
     .select()
@@ -36,14 +51,14 @@ export async function createChurchFromMaster(formData: FormData) {
     return
   }
 
-  // 3. Vincular o usuário à igreja como admin
-  const { error: profileError } = await supabase
+  // 3. Vincular o usuário à igreja como admin (usando admin client para garantir)
+  const { error: profileError } = await supabaseAdmin
     .from('profiles')
     .update({ 
       church_id: church.id, 
       role: 'admin' 
     })
-    .eq('id', authUser.user.id)
+    .eq('id', userId)
 
   if (profileError) {
     console.error('Erro ao vincular perfil:', profileError.message)
