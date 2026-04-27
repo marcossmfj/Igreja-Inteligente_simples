@@ -55,13 +55,21 @@ async function createChurch(formData: FormData) {
 export default async function DashboardPage() {
   const supabase = await createClient()
   
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('church_id, role')
+    .eq('id', user.id)
     .single()
+
+  console.log('User Role:', profile?.role)
+  console.log('Church ID:', profile?.church_id)
 
   if (!profile?.church_id) {
     if (profile?.role === 'master') {
+      console.log('Redirecting master to /master')
       redirect('/master')
     }
 
