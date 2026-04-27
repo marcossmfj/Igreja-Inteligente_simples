@@ -62,11 +62,18 @@ export default async function MasterPanel() {
                     required
                   />
                 </div>
-                <p className="text-[10px] text-muted-foreground italic">
-                  * O usuário deve estar cadastrado no sistema para ser vinculado.
-                </p>
               </div>
-              <Button type="submit" className="w-full">Criar e Vincular</Button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Senha Inicial</label>
+                <input
+                  name="adminPassword"
+                  type="password"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="Defina uma senha"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">Criar Igreja e Usuário</Button>
             </form>
           </CardContent>
         </Card>
