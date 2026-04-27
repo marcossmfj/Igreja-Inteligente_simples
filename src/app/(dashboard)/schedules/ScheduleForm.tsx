@@ -53,13 +53,19 @@ export function ScheduleForm({
       setOpen(val)
       if (!val) setError(null)
     }}>
-      <DialogTrigger render={defaultValues ? null : <Button />}>
-        {defaultValues ? null : <><Plus className="mr-2 h-4 w-4" /> Criar Escala</>}
-      </DialogTrigger>
-      {defaultValues && (
-        <Button size="icon-sm" variant="ghost" onClick={() => setOpen(true)} className="h-8 w-8 rounded-full bg-primary/10 text-primary hover:bg-primary/20">
+      {defaultValues ? (
+        <Button 
+          size="icon-sm" 
+          variant="ghost" 
+          onClick={() => setOpen(true)} 
+          className="h-8 w-8 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+        >
           <Plus className="h-4 w-4" />
         </Button>
+      ) : (
+        <DialogTrigger render={<Button />}>
+          <Plus className="mr-2 h-4 w-4" /> Criar Escala
+        </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
