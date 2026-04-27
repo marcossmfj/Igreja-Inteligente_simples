@@ -32,12 +32,37 @@ export async function addSkill(formData: FormData) {
     })
     
     if (error) {
+      console.error('Erro ao inserir habilidade:', error)
       return { error: 'Erro ao inserir habilidade: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/skills')
     return { success: true }
   } catch (err: any) {
+    console.error('Erro inesperado em addSkill:', err)
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
+  }
+}
+
+export async function updateSkill(id: string, formData: FormData) {
+  try {
+    const name = formData.get('name') as string
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('skills')
+      .update({ name })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Erro ao atualizar habilidade:', error)
+      return { error: 'Erro ao atualizar habilidade: ' + error.message }
+    }
+
+    revalidatePath('/skills')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Erro inesperado em updateSkill:', err)
     return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }

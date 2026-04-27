@@ -35,12 +35,38 @@ export async function addVisitor(formData: FormData) {
     })
     
     if (error) {
+      console.error('Erro ao inserir visitante:', error)
       return { error: 'Erro ao inserir visitante: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/visitors')
     return { success: true }
   } catch (err: any) {
+    console.error('Erro inesperado em addVisitor:', err)
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
+  }
+}
+
+export async function updateVisitor(id: string, formData: FormData) {
+  try {
+    const name = formData.get('name') as string
+    const phone = formData.get('phone') as string
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('visitors')
+      .update({ name, phone })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Erro ao atualizar visitante:', error)
+      return { error: 'Erro ao atualizar visitante: ' + error.message }
+    }
+
+    revalidatePath('/visitors')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Erro inesperado em updateVisitor:', err)
     return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }

@@ -43,6 +43,7 @@ export async function addMember(formData: FormData) {
       .single()
 
     if (memberError || !member) {
+      console.error('Erro ao inserir membro:', memberError)
       return { error: 'Erro ao inserir membro: ' + (memberError?.message || 'Erro desconhecido') }
     }
 
@@ -54,6 +55,7 @@ export async function addMember(formData: FormData) {
       }))
       const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
       if (skillsError) {
+        console.error('Erro ao inserir habilidades do membro:', skillsError)
         return { error: 'Erro ao inserir habilidades do membro: ' + (skillsError?.message || 'Erro desconhecido') }
       }
     }
@@ -61,6 +63,7 @@ export async function addMember(formData: FormData) {
     revalidatePath('/members')
     return { success: true }
   } catch (err: any) {
+    console.error('Erro inesperado em addMember:', err)
     return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
@@ -85,6 +88,7 @@ export async function updateMember(id: string, formData: FormData) {
       .eq('id', id)
 
     if (memberError) {
+      console.error('Erro ao atualizar membro:', memberError)
       return { error: 'Erro ao atualizar membro: ' + memberError.message }
     }
 
@@ -98,6 +102,7 @@ export async function updateMember(id: string, formData: FormData) {
       }))
       const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
       if (skillsError) {
+        console.error('Erro ao atualizar habilidades:', skillsError)
         return { error: 'Erro ao atualizar habilidades: ' + skillsError.message }
       }
     }
@@ -105,6 +110,7 @@ export async function updateMember(id: string, formData: FormData) {
     revalidatePath('/members')
     return { success: true }
   } catch (err: any) {
+    console.error('Erro inesperado em updateMember:', err)
     return { error: 'Erro inesperado: ' + err.message }
   }
 }

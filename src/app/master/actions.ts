@@ -38,7 +38,10 @@ export async function createChurchFromMaster(formData: FormData) {
           .eq('email', adminEmail)
           .maybeSingle()
         
-        if (searchError) return { error: 'Erro ao buscar perfil: ' + (searchError?.message || 'Erro desconhecido') }
+        if (searchError) {
+          console.error('Erro ao buscar perfil:', searchError)
+          return { error: 'Erro ao buscar perfil: ' + (searchError?.message || 'Erro desconhecido') }
+        }
 
         if (existingProfile) {
           userId = existingProfile.id
@@ -49,6 +52,7 @@ export async function createChurchFromMaster(formData: FormData) {
           const authUserRecord = users.find(u => u.email === adminEmail)
           
           if (listError || !authUserRecord) {
+            console.error('Usuário existe mas perfil inacessível:', listError)
             return { error: 'Usuário existe mas seu perfil está inacessível. Tente usar outro e-mail.' }
           }
           
@@ -57,6 +61,7 @@ export async function createChurchFromMaster(formData: FormData) {
           await supabaseAdmin.from('profiles').insert({ id: userId, email: adminEmail })
         }
       } else {
+        console.error('Erro no Auth ao criar usuário:', authError)
         return { error: 'Erro no Auth: ' + (authError?.message || 'Erro desconhecido') }
       }
     }
@@ -70,7 +75,10 @@ export async function createChurchFromMaster(formData: FormData) {
       .select()
       .single()
 
-    if (churchError) return { error: 'Erro ao criar igreja: ' + (churchError?.message || 'Erro desconhecido') }
+    if (churchError) {
+      console.error('Erro ao criar igreja:', churchError)
+      return { error: 'Erro ao criar igreja: ' + (churchError?.message || 'Erro desconhecido') }
+    }
 
     // 3. Vincular o usuário à igreja
     console.log('Vinculando igreja', church.id, 'ao usuário', userId)
@@ -83,13 +91,50 @@ export async function createChurchFromMaster(formData: FormData) {
       })
       .or(`id.eq.${userId},email.eq.${adminEmail}`) // Tenta pelo ID ou pelo E-mail
 
-    if (profileError) return { error: 'Erro ao vincular perfil: ' + (profileError?.message || 'Erro desconhecido') }
+    if (profileError) {
+      console.error('Erro ao vincular perfil:', profileError)
+      return { error: 'Erro ao vincular perfil: ' + (profileError?.message || 'Erro desconhecido') }
+    }
 
     revalidatePath('/master')
     return { success: true }
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Erro desconhecido'
-    console.error('CRASH NA AÇÃO:', e)
+    console.error('CRASH NA AÇÃO createChurchFromMaster:', e)
     return { error: 'Erro crítico no servidor: ' + message }
+  }
+}
+
+export async function toggleChurchBlock(churchId: string, isBlocked: boolean) {
+  try {
+    const supabaseAdmin = createAdminClient()
+    const { error } = await supabaseAdmin
+      .from('churches')
+      .update({ is_blocked: !isBlocked })
+      .eq('id', churchId)
+
+    if (error) throw error
+    revalidatePath('/master')
+    return { success: true }
+  } catch (e: any) {
+    console.error('Erro ao alternar bloqueio da igreja:', e.message)
+    return { error: e.message }
+  }
+}
+
+export async function updateChurchName(churchId: string, name: string) {
+  try {
+    const supabaseAdmin = createAdminClient()
+    const { error } = await supabaseAdmin
+      .from('churches')
+      .update({ name })
+      .eq('id', churchId)
+
+    if (error) throw error
+    revalidatePath('/master')
+    return { success: true }
+  } catch (e: any) {
+    console.error('Erro ao atualizar nome da igreja:', e.message)
+    return { error: e.message }
   }
 }
