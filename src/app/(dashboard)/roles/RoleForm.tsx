@@ -53,16 +53,18 @@ export function RoleForm({ role }: { role?: Role }) {
       setOpen(isOpen)
       if (!isOpen) setError(null)
     }}>
-      <DialogTrigger asChild>
-        {isEditing ? (
-          <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-white hover:text-blue-600 hover:shadow-xl transition-all">
-            <Pencil className="h-4 w-4" />
-          </button>
-        ) : (
-          <Button className="h-12 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-            <Plus className="mr-2 h-4 w-4" /> Novo Cargo
-          </Button>
-        )}
+      <DialogTrigger>
+        <div className="flex items-center">
+          {isEditing ? (
+            <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-white hover:text-blue-600 hover:shadow-xl transition-all">
+              <Pencil className="h-4 w-4" />
+            </button>
+          ) : (
+            <Button className="h-12 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+              <Plus className="mr-2 h-4 w-4" /> Novo Cargo
+            </Button>
+          )}
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
         <div className="bg-slate-900 p-8 text-white">
