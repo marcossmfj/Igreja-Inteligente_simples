@@ -95,11 +95,19 @@ ALTER TABLE schedules ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Usuários podem ver sua própria igreja" ON churches
     FOR SELECT USING (id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
 
-CREATE POLICY "Usuários podem ver perfis da sua igreja" ON profiles
-    FOR SELECT USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+CREATE POLICY "Usuários podem ver seu próprio perfil" ON profiles
+    FOR SELECT USING (id = auth.uid());
 
-CREATE POLICY "Gerenciamento de Cargos por Igreja" ON roles
-    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+CREATE POLICY "Usuários podem atualizar seu próprio perfil" ON profiles
+    FOR UPDATE USING (id = auth.uid());
+
+-- Política para o Admin Master (Dono do Sistema)
+CREATE POLICY "Master pode tudo" ON churches FOR ALL USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'master'
+);
+CREATE POLICY "Master pode gerenciar perfis" ON profiles FOR ALL USING (
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'master'
+);
 
 CREATE POLICY "Gerenciamento de Skills por Igreja" ON skills
     FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));

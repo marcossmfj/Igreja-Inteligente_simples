@@ -7,10 +7,19 @@ export async function addSkill(formData: FormData) {
   const name = formData.get('name') as string
   const supabase = await createClient()
   
-  const { data: profile } = await supabase.from('profiles').select('church_id').single()
-  if (!profile?.church_id) return
+  const { data: profile, error: profileError } = await supabase.from('profiles').select('church_id').single()
+  
+  if (profileError || !profile?.church_id) {
+    console.error('Error fetching profile or missing church_id:', profileError)
+    return
+  }
 
-  await supabase.from('skills').insert({ name, church_id: profile.church_id })
+  const { error } = await supabase.from('skills').insert({ name, church_id: profile.church_id })
+  
+  if (error) {
+    console.error('Error inserting skill:', error)
+  }
+
   revalidatePath('/skills')
 }
 

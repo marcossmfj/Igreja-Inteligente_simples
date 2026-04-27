@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Users, Users2, CalendarDays, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 async function createChurch(formData: FormData) {
   'use server'
@@ -10,7 +11,10 @@ async function createChurch(formData: FormData) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
+  if (!user) {
+    console.error('Nenhum usuário logado')
+    return
+  }
 
   // 1. Criar a igreja
   const { data: church, error: churchError } = await supabase
@@ -19,13 +23,30 @@ async function createChurch(formData: FormData) {
     .select()
     .single()
 
-  if (churchError) return
+  if (churchError) {
+    console.error('Erro ao criar igreja:', churchError.message, churchError.details)
+    return
+  }
 
-  // 2. Vincular o usuário à igreja como admin
-  await supabase
+  // 2. Buscar o perfil atual para manter o cargo se for master
+  const { data: profile } = await supabase
     .from('profiles')
-    .update({ church_id: church.id, role: 'admin' })
+    .select('role')
     .eq('id', user.id)
+    .single()
+
+  const newRole = profile?.role === 'master' ? 'master' : 'admin'
+
+  // 3. Vincular o usuário à igreja
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({ church_id: church.id, role: newRole })
+    .eq('id', user.id)
+
+  if (profileError) {
+    console.error('Erro ao vincular perfil à igreja:', profileError.message)
+    return
+  }
 
   revalidatePath('/')
 }
@@ -39,38 +60,21 @@ export default async function DashboardPage() {
     .single()
 
   if (!profile?.church_id) {
+    if (profile?.role === 'master') {
+      redirect('/master')
+    }
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-        <div className="text-center space-y-2">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
+        <div className="space-y-2">
           <h2 className="text-3xl font-bold">Bem-vindo!</h2>
-          <p className="text-muted-foreground">
-            Você ainda não está vinculado a nenhuma igreja.
+          <p className="text-muted-foreground max-w-md">
+            Sua conta ainda não está vinculada a nenhuma igreja. Por favor, entre em contato com o administrador do sistema para solicitar seu acesso.
           </p>
         </div>
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Criar Nova Igreja</CardTitle>
-            <CardDescription>
-              Comece criando o perfil da sua igreja no sistema.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={createChurch} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome da Igreja</label>
-                <input
-                  name="name"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Ex: Igreja Batista Central"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                <Plus className="mr-2 h-4 w-4" /> Criar Igreja
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <Button variant="outline" asChild>
+          <a href="https://wa.me/5511999999999" target="_blank">Falar com Suporte</a>
+        </Button>
       </div>
     )
   }

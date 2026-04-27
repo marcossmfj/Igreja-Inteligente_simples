@@ -9,10 +9,13 @@ import {
   Stethoscope, 
   Users2, 
   CalendarDays,
-  LogOut 
+  LogOut,
+  ShieldCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logout } from '@/app/login/actions'
+import { createClient } from '@/utils/supabase/client'
+import { useEffect, useState } from 'react'
 
 const menuItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -25,6 +28,19 @@ const menuItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [role, setRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function getRole() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        setRole(data?.role || 'user')
+      }
+    }
+    getRole()
+  }, [])
 
   return (
     <div className="flex flex-col w-64 bg-white border-r min-h-screen">
@@ -32,6 +48,18 @@ export function Sidebar() {
         <h1 className="text-xl font-bold text-primary">Igreja Inteligente</h1>
       </div>
       <nav className="flex-1 px-4 space-y-1">
+        {role === 'master' && (
+          <Link
+            href="/master"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors mb-4 border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
+              pathname === '/master' && "bg-amber-200"
+            )}
+          >
+            <ShieldCheck className="mr-3 h-5 w-5" />
+            Painel Master
+          </Link>
+        )}
         {menuItems.map((item) => {
           const isActive = pathname === item.href
           return (

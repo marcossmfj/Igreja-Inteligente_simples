@@ -11,11 +11,15 @@ export async function addMember(formData: FormData) {
 
   const supabase = await createClient()
   
-  const { data: profile } = await supabase.from('profiles').select('church_id').single()
-  if (!profile?.church_id) return
+  const { data: profile, error: profileError } = await supabase.from('profiles').select('church_id').single()
+  
+  if (profileError || !profile?.church_id) {
+    console.error('Error fetching profile or missing church_id:', profileError)
+    return
+  }
 
   // 1. Inserir membro
-  const { data: member, error } = await supabase
+  const { data: member, error: memberError } = await supabase
     .from('members')
     .insert({ 
       name, 
@@ -26,7 +30,10 @@ export async function addMember(formData: FormData) {
     .select()
     .single()
 
-  if (error || !member) return
+  if (memberError || !member) {
+    console.error('Error inserting member:', memberError)
+    return
+  }
 
   // 2. Inserir skills se houver
   if (skills.length > 0) {
@@ -34,7 +41,10 @@ export async function addMember(formData: FormData) {
       member_id: member.id,
       skill_id
     }))
-    await supabase.from('member_skills').insert(memberSkills)
+    const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
+    if (skillsError) {
+      console.error('Error inserting member skills:', skillsError)
+    }
   }
 
   revalidatePath('/members')
