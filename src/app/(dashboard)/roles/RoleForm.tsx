@@ -53,18 +53,18 @@ export function RoleForm({ role }: { role?: Role }) {
       if (!isOpen) setError(null)
     }}>
       <DialogTrigger
-        asChild
-      >
-        {isEditing ? (
-          <Button variant="ghost" size="icon">
-            <Pencil className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Novo Cargo
-          </Button>
-        )}
-      </DialogTrigger>
+        render={
+          isEditing ? (
+            <Button variant="ghost" size="icon">
+              <Pencil className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Novo Cargo
+            </Button>
+          )
+        }
+      />
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar Cargo' : 'Adicionar Cargo'}</DialogTitle>
