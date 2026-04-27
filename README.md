@@ -1,48 +1,43 @@
-# Igreja Inteligente ⛪
+# Igreja Inteligente Simples
 
-Sistema web SaaS multi-tenant para automação de processos administrativos de igrejas (Gestão de Membros, Visitantes e Escalas Inteligentes).
+MVP de gestão eclesiástica com foco em simplicidade, velocidade e design premium.
 
 ## 🚀 Tecnologias
-- **Frontend:** Next.js 15+, Tailwind CSS, shadcn/ui.
-- **Backend/Banco:** Supabase (Auth, PostgreSQL, Row Level Security).
-- **Estilização:** Tailwind CSS.
+- **Framework:** Next.js 15 (App Router)
+- **Estilização:** Tailwind CSS + Shadcn UI
+- **Banco de Dados & Auth:** Supabase
+- **Ícones:** Lucide React
 
-## ⚙️ Configuração do Banco de Dados (Supabase)
+## 🛠️ Configuração do Supabase
 
-1. Crie um projeto no [Supabase](https://supabase.com/).
-2. Vá em **SQL Editor** e execute o conteúdo do arquivo `supabase_schema.sql` deste repositório. Isso criará:
-   - Tabelas (`churches`, `profiles`, `members`, etc).
-   - Políticas de RLS (garantindo que uma igreja não veja dados da outra).
-   - Triggers para criação automática de perfil de usuário.
+### 1. Criar Tabelas
+Execute o script `supabase_schema.sql` no SQL Editor do Supabase para criar a estrutura necessária:
+- `churches`: Gestão das instituições.
+- `profiles`: Perfis de usuários com RBAC (master, admin, user).
+- `members`, `roles`, `skills`, `visitors`, `schedules`: Módulos do sistema.
 
-## 💻 Como rodar localmente
+### 2. Variáveis de Ambiente
+Crie um arquivo `.env.local` na raiz do projeto:
+```env
+NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
+SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_para_admin
+```
 
-1. Clone o repositório.
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Copie o arquivo `.env.example` para `.env.local`:
-   ```bash
-   cp .env.example .env.local
-   ```
-4. Preencha as variáveis `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` com as chaves do seu projeto no Supabase (**Project Settings > API**).
-5. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-6. Acesse `http://localhost:3000`.
+## 📦 Execução
+```bash
+# Instalar dependências
+npm install
 
-## 📦 Deploy na Vercel
+# Rodar em desenvolvimento
+npm run dev
 
-1. Conecte seu repositório GitHub à [Vercel](https://vercel.com/).
-2. Configure as **Environment Variables** no painel da Vercel com os mesmos nomes do arquivo `.env.local`.
-3. Clique em **Deploy**.
+# Build para produção
+npm run build
+```
 
-## 🧠 Lógicas Implementadas
-- **Multi-tenancy:** Todo dado é filtrado pelo `church_id` do usuário logado.
-- **Escala Inteligente:** Ao criar uma escala para uma função (ex: Guitarrista), o sistema filtra automaticamente apenas os membros que possuem essa habilidade.
-- **WhatsApp Direct:** Geração de links automáticos para envio de mensagens de boas-vindas para visitantes.
-
-## 🛡️ Segurança
-O sistema utiliza **Row Level Security (RLS)** do PostgreSQL via Supabase. Mesmo que alguém tente acessar dados via API diretamente, as políticas garantem que ele só possa ver dados vinculados ao seu próprio `church_id`.
+## 🎨 Padrão Visual
+O projeto utiliza a estética **Modern Minimalist**:
+- Paleta Slate/Zinc com Blue-600 para destaques.
+- Cards com `rounded-[2rem]` e sombras suaves.
+- Tipografia com pesos variados para hierarquia clara.
