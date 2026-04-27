@@ -8,7 +8,14 @@ import { createChurchFromMaster } from './actions'
 import { useState } from 'react'
 import { logout } from '@/app/login/actions'
 
-export default function MasterPanelClient({ churches }: { churches: any[] }) {
+interface Church {
+  id: string
+  name: string
+  created_at: string
+  profiles?: { email: string }[]
+}
+
+export default function MasterPanelClient({ churches }: { churches: Church[] }) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -20,8 +27,9 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
       if (result?.error) {
         setError(result.error)
       }
-    } catch (e: any) {
-      setError('Erro inesperado: ' + e.message)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erro desconhecido'
+      setError('Erro inesperado: ' + message)
     } finally {
       setLoading(false)
     }

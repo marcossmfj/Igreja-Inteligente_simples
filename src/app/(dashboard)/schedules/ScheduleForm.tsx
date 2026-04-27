@@ -15,13 +15,18 @@ import { Label } from '@/components/ui/label'
 import { Plus } from 'lucide-react'
 import { addSchedule } from './actions'
 
+interface Skill {
+  id: string
+  name: string
+}
+
 interface Member {
   id: string
   name: string
   member_skills: { skill_id: string }[]
 }
 
-export function ScheduleForm({ skills, members }: { skills: any[], members: Member[] }) {
+export function ScheduleForm({ skills, members }: { skills: Skill[], members: Member[] }) {
   const [open, setOpen] = useState(false)
   const [selectedSkill, setSelectedSkill] = useState('')
 

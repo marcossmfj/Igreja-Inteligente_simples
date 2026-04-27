@@ -14,9 +14,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus } from 'lucide-react'
 import { addMember } from './actions'
-import { Checkbox } from '@/components/ui/checkbox'
 
-export function MemberForm({ roles, skills }: { roles: any[], skills: any[] }) {
+interface Role {
+  id: string
+  name: string
+}
+
+interface Skill {
+  id: string
+  name: string
+}
+
+export function MemberForm({ roles, skills }: { roles: Role[], skills: Skill[] }) {
   const [open, setOpen] = useState(false)
 
   return (

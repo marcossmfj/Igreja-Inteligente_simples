@@ -87,8 +87,9 @@ export async function createChurchFromMaster(formData: FormData) {
 
     revalidatePath('/master')
     return { success: true }
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Erro desconhecido'
     console.error('CRASH NA AÇÃO:', e)
-    return { error: 'Erro crítico no servidor: ' + (e.message || 'Erro desconhecido') }
+    return { error: 'Erro crítico no servidor: ' + message }
   }
 }

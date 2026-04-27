@@ -1,59 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Users2, CalendarDays, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { revalidatePath } from 'next/cache'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Users, Users2, CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-
-export const dynamic = 'force-dynamic'
-
-async function createChurch(formData: FormData) {
-  'use server'
-  const name = formData.get('name') as string
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    console.error('Nenhum usuário logado')
-    return
-  }
-
-  // 1. Criar a igreja
-  const { data: church, error: churchError } = await supabase
-    .from('churches')
-    .insert({ name })
-    .select()
-    .single()
-
-  if (churchError) {
-    console.error('Erro ao criar igreja:', churchError.message, churchError.details)
-    return
-  }
-
-  // 2. Buscar o perfil atual para manter o cargo se for master
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  const newRole = profile?.role === 'master' ? 'master' : 'admin'
-
-  // 3. Vincular o usuário à igreja
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({ church_id: church.id, role: newRole })
-    .eq('id', user.id)
-
-  if (profileError) {
-    console.error('Erro ao vincular perfil à igreja:', profileError.message)
-    return
-  }
-
-  revalidatePath('/')
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
