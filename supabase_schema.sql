@@ -109,22 +109,30 @@ CREATE POLICY "Master pode gerenciar perfis" ON profiles FOR ALL USING (
     (SELECT role FROM profiles WHERE id = auth.uid()) = 'master'
 );
 
+CREATE POLICY "Gerenciamento de Cargos por Igreja" ON roles
+    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
+    WITH CHECK (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+
 CREATE POLICY "Gerenciamento de Skills por Igreja" ON skills
-    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
+    WITH CHECK (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
 
 CREATE POLICY "Gerenciamento de Membros por Igreja" ON members
-    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
+    WITH CHECK (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Gerenciamento de Visitantes por Igreja" ON visitors
+    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
+    WITH CHECK (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Gerenciamento de Escalas por Igreja" ON schedules
+    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
+    WITH CHECK (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
 
 CREATE POLICY "Gerenciamento de Skills de Membros por Igreja" ON member_skills
     FOR ALL USING (
         member_id IN (SELECT id FROM members WHERE church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()))
     );
-
-CREATE POLICY "Gerenciamento de Visitantes por Igreja" ON visitors
-    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
-
-CREATE POLICY "Gerenciamento de Escalas por Igreja" ON schedules
-    FOR ALL USING (church_id IN (SELECT church_id FROM profiles WHERE id = auth.uid()));
 
 -- Política para o Admin Master (Dono do Sistema)
 -- Pode ser adicionada posteriormente para permitir acesso global.

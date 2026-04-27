@@ -1,20 +1,29 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addMember(formData: FormData) {
   const name = formData.get('name') as string
   const phone = formData.get('phone') as string
   const role_id = formData.get('role_id') as string
-  const skills = formData.getAll('skills') as string[] // Array of skill IDs
+  const skills = formData.getAll('skills') as string[]
 
   const supabase = await createClient()
+  const supabaseAdmin = createAdminClient()
   
-  const { data: profile, error: profileError } = await supabase.from('profiles').select('church_id').single()
-  
-  if (profileError || !profile?.church_id) {
-    console.error('Error fetching profile or missing church_id:', profileError)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('church_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.church_id) {
+    console.error('Usuário sem igreja vinculada')
     return
   }
 
@@ -31,7 +40,7 @@ export async function addMember(formData: FormData) {
     .single()
 
   if (memberError || !member) {
-    console.error('Error inserting member:', memberError)
+    console.error('Erro ao inserir membro:', memberError?.message)
     return
   }
 
@@ -42,9 +51,7 @@ export async function addMember(formData: FormData) {
       skill_id
     }))
     const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
-    if (skillsError) {
-      console.error('Error inserting member skills:', skillsError)
-    }
+    if (skillsError) console.error('Erro ao inserir habilidades do membro:', skillsError.message)
   }
 
   revalidatePath('/members')
