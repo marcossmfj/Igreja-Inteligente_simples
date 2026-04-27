@@ -10,11 +10,9 @@ export async function addRole(formData: FormData) {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.error('Erro de autenticação:', authError?.message)
-      return
+      return { error: 'Usuário não autenticado.' }
     }
 
-    // Buscar o perfil do usuário para pegar a igreja
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('church_id')
@@ -22,8 +20,7 @@ export async function addRole(formData: FormData) {
       .single()
 
     if (profileError || !profile?.church_id) {
-      console.error('Erro ao buscar perfil ou igreja não vinculada:', profileError?.message)
-      return
+      return { error: 'Seu usuário não está vinculado a nenhuma igreja no banco de dados. Contate o administrador.' }
     }
 
     const { error } = await supabase.from('roles').insert({ 
@@ -32,12 +29,13 @@ export async function addRole(formData: FormData) {
     })
 
     if (error) {
-      console.error('Erro ao inserir cargo no banco:', error.message)
+      return { error: 'Erro no banco: ' + error.message }
     }
 
     revalidatePath('/roles')
-  } catch (err) {
-    console.error('Erro crítico na action addRole:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
 
