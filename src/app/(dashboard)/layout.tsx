@@ -17,6 +17,18 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
+  // Verificar se a igreja está bloqueada
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('church_id, role, churches(is_blocked)')
+    .eq('id', user.id)
+    .single()
+
+  // @ts-ignore
+  if (profile?.churches?.is_blocked && profile.role !== 'master') {
+    redirect('/blocked')
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />

@@ -79,11 +79,18 @@ export default async function MembersPage() {
                     ) : '-'}
                   </TableCell>
                   <TableCell>
-                    <form action={deleteMember.bind(null, member.id)}>
-                      <Button variant="ghost" size="icon" type="submit">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </form>
+                    <div className="flex items-center gap-2">
+                      <MemberForm 
+                        roles={roles || []} 
+                        skills={skills || []} 
+                        member={member} 
+                      />
+                      <form action={deleteMember.bind(null, member.id)}>
+                        <Button variant="ghost" size="icon" type="submit">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </form>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -23,55 +23,45 @@ export default async function SkillsPage() {
             Gerencie as habilidades (skills) para as escalas.
           </p>
         </div>
+        <SkillForm />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Adicionar Habilidade</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SkillForm />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Habilidades Existentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {skills?.map((skill) => (
-                  <TableRow key={skill.id}>
-                    <TableCell className="font-medium">{skill.name}</TableCell>
-                    <TableCell>
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {skills?.map((skill) => (
+                <TableRow key={skill.id}>
+                  <TableCell className="font-medium">{skill.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <SkillForm skill={skill} />
                       <form action={deleteSkill.bind(null, skill.id)}>
                         <Button variant="ghost" size="icon" type="submit">
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </form>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {skills?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground py-4">
-                      Nenhuma habilidade cadastrada.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {skills?.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
+                    Nenhuma habilidade cadastrada.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }

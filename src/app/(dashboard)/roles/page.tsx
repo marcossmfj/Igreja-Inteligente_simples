@@ -23,55 +23,45 @@ export default async function RolesPage() {
             Gerencie os cargos e funções da sua igreja.
           </p>
         </div>
+        <RoleForm />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Adicionar Cargo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RoleForm />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Cargos Existentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {roles?.map((role) => (
-                  <TableRow key={role.id}>
-                    <TableCell className="font-medium">{role.name}</TableCell>
-                    <TableCell>
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {roles?.map((role) => (
+                <TableRow key={role.id}>
+                  <TableCell className="font-medium">{role.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <RoleForm role={role} />
                       <form action={deleteRole.bind(null, role.id)}>
                         <Button variant="ghost" size="icon" type="submit">
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </form>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {roles?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground py-4">
-                      Nenhum cargo cadastrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {roles?.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
+                    Nenhum cargo cadastrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }
