@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 async function createChurch(formData: FormData) {
   'use server'
   const name = formData.get('name') as string
@@ -78,9 +80,12 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
         <div className="space-y-2">
+          <div className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500 mb-4 inline-block">
+            LOGADO COMO: {user.email}
+          </div>
           <h2 className="text-3xl font-bold">Bem-vindo!</h2>
           <p className="text-muted-foreground max-w-md">
-            Sua conta ainda não está vinculada a nenhuma igreja. Por favor, entre em contato com o administrador do sistema para solicitar seu acesso.
+            Sua conta ainda não está vinculada a nenhuma igreja no banco de dados.
           </p>
         </div>
         <Link 
