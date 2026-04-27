@@ -83,7 +83,7 @@ export function Sidebar() {
       </nav>
       <div className="p-4 border-t space-y-4">
         <div className="px-4 py-2 bg-gray-50 rounded-md">
-          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Usuário</p>
+          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Usuário ({role})</p>
           <p className="text-sm font-medium text-gray-600 truncate">{email}</p>
         </div>
         <button

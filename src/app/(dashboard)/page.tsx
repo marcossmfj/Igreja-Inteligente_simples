@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Users, Users2, CalendarDays, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -56,11 +57,13 @@ async function createChurch(formData: FormData) {
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  const supabaseAdmin = createAdminClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile, error } = await supabase
+  // USANDO ADMIN CLIENT AQUI PARA BYPASSAR RLS
+  const { data: profile, error } = await supabaseAdmin
     .from('profiles')
     .select('church_id, role')
     .eq('id', user.id)
