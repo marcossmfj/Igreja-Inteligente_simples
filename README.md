@@ -36,8 +36,15 @@ npm run dev
 npm run build
 ```
 
-## 🎨 Padrão Visual
-O projeto utiliza a estética **Modern Minimalist**:
-- Paleta Slate/Zinc com Blue-600 para destaques.
-- Cards com `rounded-[2rem]` e sombras suaves.
-- Tipografia com pesos variados para hierarquia clara.
+## 🎨 Padrão Visual Premium
+O projeto utiliza a estética **Modern Minimalist Premium**:
+- **Design:** Cards com `rounded-[2.5rem]`, sombras `shadow-2xl` e bordas `slate-200/60`.
+- **Animações:** Transições suaves com `animate-in fade-in`.
+- **Filtros Avançados:** Busca textual e filtros visuais por Cargos e Habilidades.
+
+## ✨ Novas Funcionalidades
+- **Notificação Assistida (Escalas):** Centro de mensagens com links dinâmicos para WhatsApp.
+  - Variáveis: Nome, Função e Data automatizados.
+  - Estado Visual: Indicador de "Enviado" ✅ para controle de fluxo.
+- **Gestão de Visitantes:** Onboarding premium com Empty States motivadores e foco em acolhimento.
+- **Tipagem Rigorosa:** Implementação 100% TypeScript com interfaces para relacionamentos do Supabase.

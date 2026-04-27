@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, AlertCircle, User, Phone } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { addVisitor } from './actions'
 
 export function VisitorForm() {
@@ -33,8 +34,8 @@ export function VisitorForm() {
         </div>
       )}
       <form action={handleSubmit} className="space-y-6">
-        <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nome Completo</label>
+        <div className="space-y-2">
+          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nome Completo</Label>
           <div className="relative group">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
             <Input 
@@ -42,12 +43,12 @@ export function VisitorForm() {
               placeholder="Ex: João Silva" 
               required 
               disabled={loading} 
-              className="pl-11 h-14 rounded-2xl border-slate-200/60 bg-white focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
+              className="pl-11 h-12 rounded-xl border-slate-200/60 bg-slate-50/50 focus:bg-white focus:ring-blue-500/10 transition-all font-medium"
             />
           </div>
         </div>
-        <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">WhatsApp</label>
+        <div className="space-y-2">
+          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">WhatsApp</Label>
           <div className="relative group">
             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
             <Input 
@@ -55,16 +56,16 @@ export function VisitorForm() {
               placeholder="(11) 99999-9999" 
               required 
               disabled={loading} 
-              className="pl-11 h-14 rounded-2xl border-slate-200/60 bg-white focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
+              className="pl-11 h-12 rounded-xl border-slate-200/60 bg-slate-50/50 focus:bg-white focus:ring-blue-500/10 transition-all font-medium"
             />
           </div>
         </div>
         <Button 
           type="submit" 
-          className="w-full h-14 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200" 
+          className="w-full h-14 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 mt-4" 
           disabled={loading}
         >
-          {loading ? 'Processando...' : <><Plus className="h-4 w-4 mr-2" /> Registrar Visita</>}
+          {loading ? 'Processando...' : <><Plus className="h-5 w-5 mr-2" /> Registrar Visita</>}
         </Button>
       </form>
     </div>
