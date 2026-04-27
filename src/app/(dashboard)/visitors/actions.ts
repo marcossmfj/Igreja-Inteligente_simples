@@ -35,26 +35,26 @@ export async function addVisitor(formData: FormData) {
     })
     
     if (error) {
-      return { error: 'Erro ao inserir visitante: ' + error.message }
+      return { error: 'Erro ao inserir visitante: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/visitors')
     return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
 
-export async function deleteVisitor(id: string) {
+export async function deleteVisitor(id: string): Promise<void> {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('visitors').delete().eq('id', id)
     if (error) {
-      return { error: 'Erro ao deletar visitante: ' + error.message }
+      console.error('Erro ao deletar visitante:', error.message)
+      return
     }
     revalidatePath('/visitors')
-    return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    console.error('Erro inesperado ao deletar visitante:', err?.message || 'Erro desconhecido')
   }
 }

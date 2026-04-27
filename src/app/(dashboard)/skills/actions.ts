@@ -32,26 +32,26 @@ export async function addSkill(formData: FormData) {
     })
     
     if (error) {
-      return { error: 'Erro ao inserir habilidade: ' + error.message }
+      return { error: 'Erro ao inserir habilidade: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/skills')
     return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
 
-export async function deleteSkill(id: string) {
+export async function deleteSkill(id: string): Promise<void> {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('skills').delete().eq('id', id)
     if (error) {
-      return { error: 'Erro ao deletar habilidade: ' + error.message }
+      console.error('Erro ao deletar habilidade:', error.message)
+      return
     }
     revalidatePath('/skills')
-    return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    console.error('Erro inesperado ao deletar habilidade:', err?.message || 'Erro desconhecido')
   }
 }

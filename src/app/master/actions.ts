@@ -38,7 +38,7 @@ export async function createChurchFromMaster(formData: FormData) {
           .eq('email', adminEmail)
           .maybeSingle()
         
-        if (searchError) return { error: 'Erro ao buscar perfil: ' + searchError.message }
+        if (searchError) return { error: 'Erro ao buscar perfil: ' + (searchError?.message || 'Erro desconhecido') }
 
         if (existingProfile) {
           userId = existingProfile.id
@@ -57,7 +57,7 @@ export async function createChurchFromMaster(formData: FormData) {
           await supabaseAdmin.from('profiles').insert({ id: userId, email: adminEmail })
         }
       } else {
-        return { error: 'Erro no Auth: ' + authError.message }
+        return { error: 'Erro no Auth: ' + (authError?.message || 'Erro desconhecido') }
       }
     }
 
@@ -70,7 +70,7 @@ export async function createChurchFromMaster(formData: FormData) {
       .select()
       .single()
 
-    if (churchError) return { error: 'Erro ao criar igreja: ' + churchError.message }
+    if (churchError) return { error: 'Erro ao criar igreja: ' + (churchError?.message || 'Erro desconhecido') }
 
     // 3. Vincular o usuário à igreja
     console.log('Vinculando igreja', church.id, 'ao usuário', userId)
@@ -83,7 +83,7 @@ export async function createChurchFromMaster(formData: FormData) {
       })
       .or(`id.eq.${userId},email.eq.${adminEmail}`) // Tenta pelo ID ou pelo E-mail
 
-    if (profileError) return { error: 'Erro ao vincular perfil: ' + profileError.message }
+    if (profileError) return { error: 'Erro ao vincular perfil: ' + (profileError?.message || 'Erro desconhecido') }
 
     revalidatePath('/master')
     return { success: true }

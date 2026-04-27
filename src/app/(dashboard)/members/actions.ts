@@ -43,7 +43,7 @@ export async function addMember(formData: FormData) {
       .single()
 
     if (memberError || !member) {
-      return { error: 'Erro ao inserir membro: ' + memberError.message }
+      return { error: 'Erro ao inserir membro: ' + (memberError?.message || 'Erro desconhecido') }
     }
 
     // 2. Inserir skills se houver
@@ -54,27 +54,27 @@ export async function addMember(formData: FormData) {
       }))
       const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
       if (skillsError) {
-        return { error: 'Erro ao inserir habilidades do membro: ' + skillsError.message }
+        return { error: 'Erro ao inserir habilidades do membro: ' + (skillsError?.message || 'Erro desconhecido') }
       }
     }
 
     revalidatePath('/members')
     return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
 
-export async function deleteMember(id: string) {
+export async function deleteMember(id: string): Promise<void> {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('members').delete().eq('id', id)
     if (error) {
-      return { error: 'Erro ao deletar membro: ' + error.message }
+      console.error('Erro ao deletar membro:', error.message)
+      return
     }
     revalidatePath('/members')
-    return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    console.error('Erro inesperado ao deletar membro:', err?.message || 'Erro desconhecido')
   }
 }

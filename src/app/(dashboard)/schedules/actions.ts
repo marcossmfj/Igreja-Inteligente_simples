@@ -37,26 +37,26 @@ export async function addSchedule(formData: FormData) {
     })
     
     if (error) {
-      return { error: 'Erro ao inserir escala: ' + error.message }
+      return { error: 'Erro ao inserir escala: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/schedules')
     return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
 
-export async function deleteSchedule(id: string) {
+export async function deleteSchedule(id: string): Promise<void> {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('schedules').delete().eq('id', id)
     if (error) {
-      return { error: 'Erro ao deletar escala: ' + error.message }
+      console.error('Erro ao deletar escala:', error.message)
+      return
     }
     revalidatePath('/schedules')
-    return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    console.error('Erro inesperado ao deletar escala:', err?.message || 'Erro desconhecido')
   }
 }

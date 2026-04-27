@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
-import { addVisitor, deleteVisitor } from './actions'
+import { deleteVisitor } from './actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Trash2, MessageCircle, Plus } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Trash2, MessageCircle } from 'lucide-react'
+import { VisitorForm } from './VisitorForm'
 
 export default async function VisitorsPage() {
   const supabase = await createClient()
@@ -31,19 +31,7 @@ export default async function VisitorsPage() {
             <CardTitle>Novo Visitante</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={addVisitor} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome</label>
-                <Input name="name" placeholder="Nome do visitante" required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">WhatsApp</label>
-                <Input name="phone" placeholder="(11) 99999-9999" required />
-              </div>
-              <Button type="submit" className="w-full">
-                <Plus className="h-4 w-4 mr-2" /> Cadastrar
-              </Button>
-            </form>
+            <VisitorForm />
           </CardContent>
         </Card>
 

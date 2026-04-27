@@ -32,26 +32,26 @@ export async function addRole(formData: FormData) {
     })
 
     if (error) {
-      return { error: 'Erro no banco: ' + error.message }
+      return { error: 'Erro no banco: ' + (error?.message || 'Erro desconhecido') }
     }
 
     revalidatePath('/roles')
     return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
   }
 }
 
-export async function deleteRole(id: string) {
+export async function deleteRole(id: string): Promise<void> {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('roles').delete().eq('id', id)
     if (error) {
-      return { error: 'Erro ao deletar cargo: ' + error.message }
+      console.error('Erro ao deletar cargo:', error.message)
+      return
     }
     revalidatePath('/roles')
-    return { success: true }
   } catch (err: any) {
-    return { error: 'Erro inesperado: ' + err.message }
+    console.error('Erro inesperado ao deletar cargo:', err?.message || 'Erro desconhecido')
   }
 }
