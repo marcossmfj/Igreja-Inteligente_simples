@@ -11,6 +11,10 @@ export async function createChurchFromMaster(formData: FormData) {
   
   const supabaseAdmin = createAdminClient()
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { error: 'CHAVE_MESTRA_FALTANDO: Configure SUPABASE_SERVICE_ROLE_KEY na Vercel.' }
+  }
+
   // 1. Tentar criar o usuário ou buscar se já existe
   const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email: adminEmail,
@@ -20,7 +24,6 @@ export async function createChurchFromMaster(formData: FormData) {
 
   let userId = authUser?.user?.id
 
-  // Se o erro for que o usuário já existe, vamos buscar o ID dele
   if (authError && authError.message.includes('already registered')) {
     const { data: existingUser } = await supabaseAdmin
       .from('profiles')
@@ -30,13 +33,11 @@ export async function createChurchFromMaster(formData: FormData) {
     
     userId = existingUser?.id
   } else if (authError) {
-    console.error('Erro no Auth:', authError.message)
-    return
+    return { error: 'Erro no Auth: ' + authError.message }
   }
 
   if (!userId) {
-    console.error('Não foi possível obter o ID do usuário')
-    return
+    return { error: 'Não foi possível obter o ID do usuário.' }
   }
 
   // 2. Criar a igreja
@@ -47,11 +48,10 @@ export async function createChurchFromMaster(formData: FormData) {
     .single()
 
   if (churchError) {
-    console.error('Erro ao criar igreja:', churchError.message)
-    return
+    return { error: 'Erro ao criar igreja: ' + churchError.message }
   }
 
-  // 3. Vincular o usuário à igreja como admin (usando admin client para garantir)
+  // 3. Vincular o usuário à igreja
   const { error: profileError } = await supabaseAdmin
     .from('profiles')
     .update({ 
@@ -61,8 +61,9 @@ export async function createChurchFromMaster(formData: FormData) {
     .eq('id', userId)
 
   if (profileError) {
-    console.error('Erro ao vincular perfil:', profileError.message)
+    return { error: 'Erro ao vincular perfil: ' + profileError.message }
   }
 
   revalidatePath('/master')
+  return { success: true }
 }
