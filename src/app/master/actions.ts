@@ -73,13 +73,15 @@ export async function createChurchFromMaster(formData: FormData) {
     if (churchError) return { error: 'Erro ao criar igreja: ' + churchError.message }
 
     // 3. Vincular o usuário à igreja
+    console.log('Vinculando igreja', church.id, 'ao usuário', userId)
+    
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ 
         church_id: church.id, 
         role: 'admin' 
       })
-      .eq('id', userId)
+      .or(`id.eq.${userId},email.eq.${adminEmail}`) // Tenta pelo ID ou pelo E-mail
 
     if (profileError) return { error: 'Erro ao vincular perfil: ' + profileError.message }
 
