@@ -58,18 +58,20 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('church_id, role')
     .eq('id', user.id)
     .single()
 
-  console.log('User Role:', profile?.role)
-  console.log('Church ID:', profile?.church_id)
+  if (error) {
+    console.error('Erro ao buscar perfil:', error.message)
+  }
 
+  // Se não tem church_id, verifica se deve ir para o painel master
   if (!profile?.church_id) {
-    if (profile?.role === 'master') {
-      console.log('Redirecting master to /master')
+    // Se o cargo for master, ou se o email for o seu admin principal
+    if (profile?.role === 'master' || user.email === 'admin@admin.com.br') {
       redirect('/master')
     }
 
