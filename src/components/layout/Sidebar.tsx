@@ -29,17 +29,19 @@ const menuItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const [role, setRole] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    async function getRole() {
+    async function getUserData() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        setEmail(user.email || null)
         const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
         setRole(data?.role || 'user')
       }
     }
-    getRole()
+    getUserData()
   }, [])
 
   return (
@@ -79,7 +81,11 @@ export function Sidebar() {
           )
         })}
       </nav>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-4">
+        <div className="px-4 py-2 bg-gray-50 rounded-md">
+          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Usuário</p>
+          <p className="text-sm font-medium text-gray-600 truncate">{email}</p>
+        </div>
         <button
           onClick={() => logout()}
           className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors"
