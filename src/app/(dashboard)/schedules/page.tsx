@@ -70,9 +70,16 @@ export default async function SchedulesPage() {
                   {group.event_name}
                 </div>
               </div>
-              <Badge variant="outline" className="bg-white">
-                {group.items.length} pessoas escaladas
-              </Badge>
+              <div className="flex items-center gap-4">
+                <Badge variant="outline" className="bg-white">
+                  {group.items.length} pessoas escaladas
+                </Badge>
+                <ScheduleForm 
+                  skills={(skills as { id: string; name: string }[]) || []} 
+                  members={(members as unknown as { id: string; name: string; member_skills: { skill_id: string }[] }[]) || []}
+                  defaultValues={{ event_name: group.event_name, date: group.date }}
+                />
+              </div>
             </div>
             <CardContent className="p-0">
               <div className="divide-y">

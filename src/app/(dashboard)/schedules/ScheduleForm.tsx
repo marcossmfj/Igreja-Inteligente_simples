@@ -26,7 +26,15 @@ interface Member {
   member_skills: { skill_id: string }[]
 }
 
-export function ScheduleForm({ skills, members }: { skills: Skill[], members: Member[] }) {
+export function ScheduleForm({ 
+  skills, 
+  members, 
+  defaultValues 
+}: { 
+  skills: Skill[], 
+  members: Member[],
+  defaultValues?: { event_name: string, date: string }
+}) {
   const [open, setOpen] = useState(false)
   const [selectedSkill, setSelectedSkill] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -45,14 +53,21 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
       setOpen(val)
       if (!val) setError(null)
     }}>
-      <DialogTrigger render={<Button />}>
-        <Plus className="mr-2 h-4 w-4" /> Criar Escala
+      <DialogTrigger render={defaultValues ? null : <Button />}>
+        {defaultValues ? null : <><Plus className="mr-2 h-4 w-4" /> Criar Escala</>}
       </DialogTrigger>
+      {defaultValues && (
+        <Button size="icon-sm" variant="ghost" onClick={() => setOpen(true)} className="h-8 w-8 rounded-full bg-primary/10 text-primary hover:bg-primary/20">
+          <Plus className="h-4 w-4" />
+        </Button>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nova Escala</DialogTitle>
+          <DialogTitle>{defaultValues ? `Adicionar à escala: ${defaultValues.event_name}` : 'Nova Escala'}</DialogTitle>
           <DialogDescription>
-            Selecione a função e o sistema mostrará apenas os membros qualificados.
+            {defaultValues 
+              ? `Adicionando membros para o dia ${new Date(defaultValues.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}`
+              : 'Selecione a função e o sistema mostrará apenas os membros qualificados.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -75,13 +90,25 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
             setSelectedSkill('')
           }
         }} className="space-y-4">
-          <div className="space-y-2">
+          <div className={defaultValues ? "hidden" : "space-y-2"}>
             <Label htmlFor="event_name">Nome do Culto / Evento</Label>
-            <Input id="event_name" name="event_name" placeholder="Ex: Culto de Domingo" required />
+            <Input 
+              id="event_name" 
+              name="event_name" 
+              defaultValue={defaultValues?.event_name} 
+              placeholder="Ex: Culto de Domingo" 
+              required={!defaultValues} 
+            />
           </div>
-          <div className="space-y-2">
+          <div className={defaultValues ? "hidden" : "space-y-2"}>
             <Label htmlFor="date">Data do Culto</Label>
-            <Input id="date" name="date" type="date" required />
+            <Input 
+              id="date" 
+              name="date" 
+              type="date" 
+              defaultValue={defaultValues?.date} 
+              required={!defaultValues} 
+            />
           </div>
           
           <div className="space-y-2">
