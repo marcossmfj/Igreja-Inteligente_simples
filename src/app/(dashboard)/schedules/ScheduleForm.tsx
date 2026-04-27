@@ -56,6 +56,10 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
           setSelectedSkill('')
         }} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="event_name">Nome do Culto / Evento</Label>
+            <Input id="event_name" name="event_name" placeholder="Ex: Culto de Domingo" required />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="date">Data do Culto</Label>
             <Input id="date" name="date" type="date" required />
           </div>

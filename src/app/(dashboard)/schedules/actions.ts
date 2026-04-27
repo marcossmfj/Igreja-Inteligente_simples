@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 export async function addSchedule(formData: FormData) {
   try {
     const date = formData.get('date') as string
+    const event_name = formData.get('event_name') as string
     const skill_id = formData.get('skill_id') as string
     const member_id = formData.get('member_id') as string
 
@@ -31,6 +32,7 @@ export async function addSchedule(formData: FormData) {
 
     const { error } = await supabase.from('schedules').insert({ 
       date, 
+      event_name: event_name || 'Culto',
       skill_id: skill_id || null, 
       member_id, 
       church_id: profile.church_id 
@@ -44,6 +46,33 @@ export async function addSchedule(formData: FormData) {
     return { success: true }
   } catch (err: any) {
     return { error: 'Erro inesperado: ' + (err?.message || 'Erro desconhecido') }
+  }
+}
+
+export async function updateSchedule(id: string, formData: FormData) {
+  try {
+    const date = formData.get('date') as string
+    const event_name = formData.get('event_name') as string
+    const skill_id = formData.get('skill_id') as string
+    const member_id = formData.get('member_id') as string
+
+    const supabase = await createClient()
+    const { error } = await supabase
+      .from('schedules')
+      .update({
+        date,
+        event_name: event_name || 'Culto',
+        skill_id: skill_id || null,
+        member_id
+      })
+      .eq('id', id)
+
+    if (error) return { error: 'Erro ao atualizar: ' + error.message }
+    
+    revalidatePath('/schedules')
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
 

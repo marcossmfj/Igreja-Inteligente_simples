@@ -65,6 +65,50 @@ export async function addMember(formData: FormData) {
   }
 }
 
+export async function updateMember(id: string, formData: FormData) {
+  try {
+    const name = formData.get('name') as string
+    const phone = formData.get('phone') as string
+    const role_id = formData.get('role_id') as string
+    const skills = formData.getAll('skills') as string[]
+
+    const supabase = await createClient()
+
+    // 1. Atualizar dados básicos
+    const { error: memberError } = await supabase
+      .from('members')
+      .update({ 
+        name, 
+        phone, 
+        role_id: role_id || null
+      })
+      .eq('id', id)
+
+    if (memberError) {
+      return { error: 'Erro ao atualizar membro: ' + memberError.message }
+    }
+
+    // 2. Atualizar skills (remover antigas e inserir novas)
+    await supabase.from('member_skills').delete().eq('member_id', id)
+    
+    if (skills.length > 0) {
+      const memberSkills = skills.map(skill_id => ({
+        member_id: id,
+        skill_id
+      }))
+      const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
+      if (skillsError) {
+        return { error: 'Erro ao atualizar habilidades: ' + skillsError.message }
+      }
+    }
+
+    revalidatePath('/members')
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
+  }
+}
+
 export async function deleteMember(id: string): Promise<void> {
   try {
     const supabase = await createClient()
