@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addSchedule(formData: FormData) {
@@ -10,22 +11,22 @@ export async function addSchedule(formData: FormData) {
     const member_id = formData.get('member_id') as string
 
     const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.error('Erro de autenticação:', authError?.message)
-      return
+      return { error: 'Usuário não autenticado.' }
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Usar Admin para evitar o erro 500 de recursividade do RLS na tabela profiles
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('church_id')
       .eq('id', user.id)
       .single()
 
     if (profileError || !profile?.church_id) {
-      console.error('Erro ao buscar perfil ou igreja não vinculada:', profileError?.message)
-      return
+      return { error: 'Seu usuário não está vinculado a nenhuma igreja. Verifique o Painel Master.' }
     }
 
     const { error } = await supabase.from('schedules').insert({ 
@@ -35,11 +36,14 @@ export async function addSchedule(formData: FormData) {
       church_id: profile.church_id 
     })
     
-    if (error) console.error('Erro ao inserir escala:', error.message)
+    if (error) {
+      return { error: 'Erro ao inserir escala: ' + error.message }
+    }
 
     revalidatePath('/schedules')
-  } catch (err) {
-    console.error('Erro crítico na action addSchedule:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
 
@@ -47,9 +51,12 @@ export async function deleteSchedule(id: string) {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('schedules').delete().eq('id', id)
-    if (error) console.error('Erro ao deletar escala:', error.message)
+    if (error) {
+      return { error: 'Erro ao deletar escala: ' + error.message }
+    }
     revalidatePath('/schedules')
-  } catch (err) {
-    console.error('Erro crítico na action deleteSchedule:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addMember(formData: FormData) {
@@ -11,22 +12,22 @@ export async function addMember(formData: FormData) {
     const skills = formData.getAll('skills') as string[]
 
     const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.error('Erro de autenticação:', authError?.message)
-      return
+      return { error: 'Usuário não autenticado.' }
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Usar Admin para evitar o erro 500 de recursividade do RLS na tabela profiles
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('church_id')
       .eq('id', user.id)
       .single()
 
     if (profileError || !profile?.church_id) {
-      console.error('Erro ao buscar perfil ou igreja não vinculada:', profileError?.message)
-      return
+      return { error: 'Seu usuário não está vinculado a nenhuma igreja. Verifique o Painel Master.' }
     }
 
     // 1. Inserir membro
@@ -42,8 +43,7 @@ export async function addMember(formData: FormData) {
       .single()
 
     if (memberError || !member) {
-      console.error('Erro ao inserir membro:', memberError?.message)
-      return
+      return { error: 'Erro ao inserir membro: ' + memberError.message }
     }
 
     // 2. Inserir skills se houver
@@ -53,12 +53,15 @@ export async function addMember(formData: FormData) {
         skill_id
       }))
       const { error: skillsError } = await supabase.from('member_skills').insert(memberSkills)
-      if (skillsError) console.error('Erro ao inserir habilidades do membro:', skillsError.message)
+      if (skillsError) {
+        return { error: 'Erro ao inserir habilidades do membro: ' + skillsError.message }
+      }
     }
 
     revalidatePath('/members')
-  } catch (err) {
-    console.error('Erro crítico na action addMember:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
 
@@ -66,9 +69,12 @@ export async function deleteMember(id: string) {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('members').delete().eq('id', id)
-    if (error) console.error('Erro ao deletar membro:', error.message)
+    if (error) {
+      return { error: 'Erro ao deletar membro: ' + error.message }
+    }
     revalidatePath('/members')
-  } catch (err) {
-    console.error('Erro crítico na action deleteMember:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }

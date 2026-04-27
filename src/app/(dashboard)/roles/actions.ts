@@ -46,9 +46,12 @@ export async function deleteRole(id: string) {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('roles').delete().eq('id', id)
-    if (error) console.error('Erro ao deletar cargo:', error.message)
+    if (error) {
+      return { error: 'Erro ao deletar cargo: ' + error.message }
+    }
     revalidatePath('/roles')
-  } catch (err) {
-    console.error('Erro crítico na action deleteRole:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }

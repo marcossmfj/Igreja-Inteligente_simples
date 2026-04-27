@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addVisitor(formData: FormData) {
@@ -9,22 +10,22 @@ export async function addVisitor(formData: FormData) {
     const phone = formData.get('phone') as string
     
     const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.error('Erro de autenticação:', authError?.message)
-      return
+      return { error: 'Usuário não autenticado.' }
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Usar Admin para evitar o erro 500 de recursividade do RLS na tabela profiles
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('church_id')
       .eq('id', user.id)
       .single()
 
     if (profileError || !profile?.church_id) {
-      console.error('Erro ao buscar perfil ou igreja não vinculada:', profileError?.message)
-      return
+      return { error: 'Seu usuário não está vinculado a nenhuma igreja. Verifique o Painel Master.' }
     }
 
     const { error } = await supabase.from('visitors').insert({ 
@@ -33,11 +34,14 @@ export async function addVisitor(formData: FormData) {
       church_id: profile.church_id 
     })
     
-    if (error) console.error('Erro ao inserir visitante:', error.message)
+    if (error) {
+      return { error: 'Erro ao inserir visitante: ' + error.message }
+    }
 
     revalidatePath('/visitors')
-  } catch (err) {
-    console.error('Erro crítico na action addVisitor:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
 
@@ -45,9 +49,12 @@ export async function deleteVisitor(id: string) {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('visitors').delete().eq('id', id)
-    if (error) console.error('Erro ao deletar visitante:', error.message)
+    if (error) {
+      return { error: 'Erro ao deletar visitante: ' + error.message }
+    }
     revalidatePath('/visitors')
-  } catch (err) {
-    console.error('Erro crítico na action deleteVisitor:', err)
+    return { success: true }
+  } catch (err: any) {
+    return { error: 'Erro inesperado: ' + err.message }
   }
 }
