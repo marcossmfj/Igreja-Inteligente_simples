@@ -63,7 +63,7 @@ export default function MasterPanelClient({ churches }: { churches: Church[] }) 
         </div>
         <Button variant="ghost" onClick={() => logout()} className="text-muted-foreground hover:text-destructive">
           <LogOut className="mr-2 h-4 w-4" /> Sair
-        </button>
+        </Button>
       </div>
 
       <div className="grid gap-8 md:grid-cols-[400px_1fr]">
