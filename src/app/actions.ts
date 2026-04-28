@@ -28,8 +28,7 @@ export async function registerChurch(formData: FormData) {
   const { data: churchData, error: churchError } = await supabaseAdmin
     .from('churches')
     .insert([{ 
-      name: churchName,
-      status: 'pending' // Novo campo que precisamos tratar no master
+      name: churchName
     }])
     .select()
     .single()

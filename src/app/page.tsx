@@ -117,7 +117,7 @@ export default function LandingPage() {
                 <Button onClick={() => setShowModal(false)} className="w-full h-14 rounded-2xl bg-slate-900">Entendi</Button>
               </div>
             ) : (
-              <form action={handleRegister} className="space-y-6">
+              <form action={handleRegister} className="space-y-6" autoComplete="off">
                 <div className="space-y-2 text-center mb-8">
                   <h3 className="text-3xl font-black text-slate-900 tracking-tight">Crie sua Conta</h3>
                   <p className="text-slate-400 font-medium">Preencha os dados da sua igreja abaixo.</p>
@@ -132,27 +132,27 @@ export default function LandingPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Seu Nome</label>
-                    <input name="userName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: Pr. João" />
+                    <input name="userName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: Pr. João" autoComplete="new-password" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nome da Igreja</label>
-                    <input name="churchName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: IB Central" />
+                    <input name="churchName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: IB Central" autoComplete="off" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telefone (WhatsApp)</label>
-                  <input name="phone" required type="tel" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="(00) 00000-0000" />
+                  <input name="phone" required type="tel" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="(00) 00000-0000" autoComplete="off" />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">E-mail de Login</label>
-                  <input name="email" required type="email" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="exemplo@email.com" />
+                  <input name="email" required type="email" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="exemplo@email.com" autoComplete="new-password" />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Senha</label>
-                  <input name="password" required type="password" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="••••••••" />
+                  <input name="password" required type="password" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="••••••••" autoComplete="new-password" />
                 </div>
 
                 <button 
