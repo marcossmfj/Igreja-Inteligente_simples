@@ -19,8 +19,8 @@ export async function login(formData: FormData) {
     return redirect(`/login?error=${encodeURIComponent(error.message)}`)
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath('/home', 'layout')
+  redirect('/home')
 }
 
 export async function logout() {

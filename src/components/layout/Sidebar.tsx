@@ -8,7 +8,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 
 const menuItems = [
-  { name: 'Início', href: '/', icon: LayoutDashboard },
+  { name: 'Início', href: '/home', icon: LayoutDashboard },
   { name: 'Membros', href: '/members', icon: Users },
   { name: 'Cargos', href: '/roles', icon: UserSquare2 },
   { name: 'Habilidades', href: '/skills', icon: Stethoscope },
