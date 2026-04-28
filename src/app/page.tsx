@@ -1,10 +1,34 @@
 'use client'
 
-import { CheckCircle2, ArrowRight, Calendar, Users, MessageSquare, Zap, ShieldCheck, Heart } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, ArrowRight, Calendar, Users, MessageSquare, Zap, ShieldCheck, Heart, X, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { registerChurch } from './actions'
 
 export default function LandingPage() {
+  const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleRegister(formData: FormData) {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await registerChurch(formData)
+      if (res?.error) {
+        setError(res.error)
+      } else {
+        setSuccess(true)
+      }
+    } catch (err: any) {
+      setError('Erro inesperado: ' + (err?.message || 'Tente novamente'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
       {/* Navigation */}
@@ -19,11 +43,12 @@ export default function LandingPage() {
             <a href="#features" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Funcionalidades</a>
             <a href="#pricing" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Preços</a>
             <Link href="/login" className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">Entrar</Link>
-            <Link href="/login">
-              <Button size="sm" className="rounded-full px-6 font-bold bg-slate-900 hover:bg-blue-600 transition-all">
-                Teste Grátis
-              </Button>
-            </Link>
+            <button 
+              onClick={() => setShowModal(true)}
+              className="rounded-full px-6 py-2.5 text-sm font-black uppercase tracking-widest bg-slate-900 text-white hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+            >
+              Teste Grátis
+            </button>
           </div>
         </div>
       </nav>
@@ -51,18 +76,97 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
-            <Link href="/login">
-              <button className="group relative px-10 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-blue-200 hover:bg-blue-600 hover:-translate-y-1 transition-all duration-500 overflow-hidden">
-                <span className="relative z-10 flex items-center gap-3">
-                  Começar 30 Dias Grátis <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
-            </Link>
+            <button 
+              onClick={() => setShowModal(true)}
+              className="group relative px-10 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-blue-200 hover:bg-blue-600 hover:-translate-y-1 transition-all duration-500 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-3">
+                Começar 30 Dias Grátis <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
             <p className="text-sm font-bold text-slate-400">Sem cartão de crédito. <br/>Instalação imediata.</p>
           </div>
         </div>
       </section>
+
+      {/* Modal de Cadastro */}
+      {showModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => !loading && setShowModal(false)}
+          />
+          <div className="relative w-full max-w-xl bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 animate-in zoom-in slide-in-from-bottom-8 duration-500 max-h-[90vh] overflow-y-auto scrollbar-hide">
+            <button 
+              onClick={() => setShowModal(false)}
+              className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {success ? (
+              <div className="text-center space-y-6 py-10">
+                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                  <CheckCircle2 className="h-10 w-10" />
+                </div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Solicitação Enviada!</h3>
+                <p className="text-slate-500 font-medium leading-relaxed">
+                  Recebemos seu cadastro. Nossa equipe fará a aprovação manual e você receberá um e-mail em instantes para acessar seu painel.
+                </p>
+                <Button onClick={() => setShowModal(false)} className="w-full h-14 rounded-2xl bg-slate-900">Entendi</Button>
+              </div>
+            ) : (
+              <form action={handleRegister} className="space-y-6">
+                <div className="space-y-2 text-center mb-8">
+                  <h3 className="text-3xl font-black text-slate-900 tracking-tight">Crie sua Conta</h3>
+                  <p className="text-slate-400 font-medium">Preencha os dados da sua igreja abaixo.</p>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-2 border border-red-100 animate-in shake-1">
+                    <AlertCircle className="h-4 w-4" /> {error}
+                  </div>
+                )}
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Seu Nome</label>
+                    <input name="userName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: Pr. João" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nome da Igreja</label>
+                    <input name="churchName" required className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="Ex: IB Central" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telefone (WhatsApp)</label>
+                  <input name="phone" required type="tel" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="(00) 00000-0000" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">E-mail de Login</label>
+                  <input name="email" required type="email" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="exemplo@email.com" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Senha</label>
+                  <input name="password" required type="password" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all" placeholder="••••••••" />
+                </div>
+
+                <button 
+                  disabled={loading}
+                  type="submit" 
+                  className="w-full h-14 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest text-xs hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
+                >
+                  {loading ? 'Processando...' : 'Solicitar Acesso Grátis'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Social Proof / Dashboard Preview Mockup */}
       <section className="px-6 pb-24">
@@ -162,9 +266,12 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              <Link href="/login">
-                <Button variant="outline" className="w-full h-16 rounded-2xl border-slate-200 font-black uppercase tracking-widest text-xs hover:bg-slate-50">Assinar Mensal</Button>
-              </Link>
+              <button 
+                onClick={() => setShowModal(true)}
+                className="w-full h-16 rounded-2xl border border-slate-200 font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all"
+              >
+                Assinar Mensal
+              </button>
             </div>
 
             {/* Plano Anual - O Mais Vendido */}
@@ -194,11 +301,12 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <Link href="/login" className="relative z-10">
-                  <button className="w-full h-16 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs hover:bg-white hover:text-slate-900 transition-all shadow-xl shadow-blue-900/20">
-                    Começar Agora
-                  </button>
-                </Link>
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="w-full h-16 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs hover:bg-white hover:text-slate-900 transition-all shadow-xl shadow-blue-900/20"
+                >
+                  Começar Agora
+                </button>
               </div>
             </div>
           </div>
