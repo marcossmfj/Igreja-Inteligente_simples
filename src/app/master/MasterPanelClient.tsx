@@ -13,6 +13,10 @@ interface Church {
   name: string
   is_blocked: boolean
   created_at: string
+  admin_name?: string
+  admin_phone?: string
+  admin_email?: string
+  subscription_expires_at?: string
   profiles?: { email: string }[]
 }
 
@@ -163,8 +167,9 @@ export default function MasterPanelClient({ churches }: { churches: Church[] }) 
                     <thead>
                       <tr className="border-b border-slate-50 bg-slate-50/50">
                         <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Instituição</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Administrador</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Instituição / Lead</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contato</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Validade</th>
                         <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Controles</th>
                       </tr>
                     </thead>
@@ -199,18 +204,45 @@ export default function MasterPanelClient({ churches }: { churches: Church[] }) 
                                 </button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors shrink-0">
-                                  <Building2 className="h-5 w-5" />
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors shrink-0">
+                                    <Building2 className="h-4 w-4" />
+                                  </div>
+                                  <span className="font-black text-slate-900 text-base">{church.name}</span>
                                 </div>
-                                <span className="font-black text-slate-900 text-base">{church.name}</span>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase ml-11">
+                                  Resp: {church.admin_name || 'Não informado'} 
+                                  <span className="mx-2">•</span> 
+                                  Cad: {new Date(church.created_at).toLocaleDateString('pt-BR')}
+                                </p>
                               </div>
                             )}
                           </td>
                           <td className="px-8 py-6">
-                            <div className="flex items-center gap-2 text-slate-400 group-hover:text-slate-600 transition-colors">
-                              <Mail className="h-3.5 w-3.5" />
-                              <span className="text-sm font-medium">{church.profiles?.[0]?.email || 'Sem admin'}</span>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <Mail className="h-3.5 w-3.5" />
+                                <span className="text-xs font-bold">{church.admin_email || church.profiles?.[0]?.email || 'Sem email'}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-400">
+                                <span className="text-[10px] font-black text-blue-500 uppercase">{church.admin_phone || 'S/ Telefone'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex flex-col">
+                              <span className={cn(
+                                "text-xs font-black",
+                                church.subscription_expires_at && new Date(church.subscription_expires_at) < new Date() 
+                                  ? "text-red-500" 
+                                  : "text-slate-700"
+                              )}>
+                                {church.subscription_expires_at 
+                                  ? new Date(church.subscription_expires_at).toLocaleDateString('pt-BR') 
+                                  : '---'}
+                              </span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Vencimento</span>
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">

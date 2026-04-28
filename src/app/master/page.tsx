@@ -23,12 +23,10 @@ export default async function MasterPanel() {
   }
 
   // 3. Listar igrejas existentes
-  const { data: rawChurches } = await supabaseAdmin
+  const { data: churches } = await supabase
     .from('churches')
     .select('*, profiles(email)')
     .order('created_at', { ascending: false })
 
-  const churches = rawChurches as (any & { profiles: { email: string }[] })[] | null
-
-  return <MasterPanelClient churches={churches || []} />
+  return <MasterPanelClient churches={(churches as any) || []} />
 }

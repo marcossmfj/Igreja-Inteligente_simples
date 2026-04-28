@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 export async function registerChurch(formData: FormData) {
   const userName = formData.get('userName') as string
   const churchName = formData.get('churchName') as string
+  const phone = formData.get('phone') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -24,11 +25,16 @@ export async function registerChurch(formData: FormData) {
     return { error: 'Erro ao criar usuário: ' + authError.message }
   }
 
-  // 2. Criar a igreja com status pendente
+  // 2. Criar a igreja (bloqueada por padrão para aprovação manual)
   const { data: churchData, error: churchError } = await supabaseAdmin
     .from('churches')
     .insert([{ 
-      name: churchName
+      name: churchName,
+      admin_name: userName,
+      admin_phone: phone,
+      admin_email: email,
+      is_blocked: true, // Começa bloqueado
+      subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 dias de teste
     }])
     .select()
     .single()
