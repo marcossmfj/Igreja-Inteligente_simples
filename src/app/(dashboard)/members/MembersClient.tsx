@@ -173,8 +173,9 @@ export function MembersClient({
 
       <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white border">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="min-w-[800px] lg:min-w-full">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-50 bg-slate-50/50">
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Membro</th>
