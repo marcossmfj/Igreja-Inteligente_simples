@@ -12,7 +12,8 @@ import {
   CheckCircle2, 
   Loader2, 
   AlertTriangle,
-  PlayCircle
+  PlayCircle,
+  Plus
 } from 'lucide-react'
 import { deleteSchedule } from './actions'
 import { cn } from '@/lib/utils'
