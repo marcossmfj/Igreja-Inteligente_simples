@@ -27,20 +27,29 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Descomente abaixo se quiser forçar autenticação em certas rotas via middleware
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser()
+  // Proteção de Rotas
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // if (
-  //   !user &&
-  //   !request.nextUrl.pathname.startsWith('/login') &&
-  //   !request.nextUrl.pathname.startsWith('/auth')
-  // ) {
-  //   const url = request.nextUrl.clone()
-  //   url.pathname = '/login'
-  //   return NextResponse.redirect(url)
-  // }
+  const isDashboardRoute = request.nextUrl.pathname.startsWith('/(dashboard)') || 
+                           request.nextUrl.pathname.startsWith('/home') ||
+                           request.nextUrl.pathname.startsWith('/members') ||
+                           request.nextUrl.pathname.startsWith('/schedules') ||
+                           request.nextUrl.pathname.startsWith('/visitors')
+
+  if (!user && isDashboardRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Se estiver logado e tentar ir pro login, manda pro home
+  if (user && request.nextUrl.pathname === '/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/home'
+    return NextResponse.redirect(url)
+  }
 
   return supabaseResponse
 }

@@ -6,6 +6,13 @@ CREATE TABLE churches (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     cnpj TEXT UNIQUE,
+    admin_name TEXT,
+    admin_phone TEXT,
+    admin_email TEXT,
+    is_blocked BOOLEAN DEFAULT FALSE,
+    subscription_expires_at TIMESTAMP WITH TIME ZONE,
+    plan_type TEXT CHECK (plan_type IN ('trial', 'mensal', 'anual', 'premium')) DEFAULT 'trial',
+    subscription_status TEXT CHECK (subscription_status IN ('active', 'trialing', 'past_due', 'blocked', 'canceled')) DEFAULT 'trialing',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

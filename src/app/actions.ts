@@ -33,7 +33,7 @@ export async function registerChurch(formData: FormData) {
       admin_name: userName,
       admin_phone: phone,
       admin_email: email,
-      is_blocked: true, // Começa bloqueado
+      is_blocked: false, // Liberado imediatamente para trial
       subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 dias de teste
     }])
     .select()

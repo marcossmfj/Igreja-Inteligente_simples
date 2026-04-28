@@ -235,7 +235,11 @@ export function MembersClient({
                           </a>
                         )}
                         <MemberForm roles={roles} skills={skills} member={member} />
-                        <form action={deleteMember.bind(null, member.id)}>
+                        <form action={async () => {
+                          if (confirm('Deseja realmente excluir este membro?')) {
+                            await deleteMember(member.id)
+                          }
+                        }}>
                           <button type="submit" className="h-10 w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100/50">
                             <Trash2 className="h-4 w-4" />
                           </button>

@@ -17,16 +17,22 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  // Verificar se a igreja está bloqueada
+  // Verificar se a igreja está bloqueada ou se a assinatura expirou
   const { data: profile } = await supabase
     .from('profiles')
-    .select('church_id, role, churches(is_blocked)')
+    .select('church_id, role, churches(is_blocked, subscription_expires_at)')
     .eq('id', user.id)
     .single()
 
-  // @ts-expect-error - churches é um retorno do join do supabase
-  if (profile?.churches?.is_blocked && profile.role !== 'master') {
-    redirect('/blocked')
+  if (profile?.role !== 'master') {
+    const church = profile?.churches as any
+    const isBlocked = church?.is_blocked
+    const expiresAt = church?.subscription_expires_at ? new Date(church.subscription_expires_at) : null
+    const isExpired = expiresAt ? expiresAt < new Date() : false
+
+    if (isBlocked || isExpired) {
+      redirect('/blocked')
+    }
   }
 
   return (

@@ -76,8 +76,15 @@ export async function updateMember(id: string, formData: FormData) {
     const skills = formData.getAll('skills') as string[]
 
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Atualizar dados básicos
+    if (!user) return { error: 'Não autenticado' }
+
+    // Buscar church_id do usuário logado
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+    if (!profile?.church_id) return { error: 'Igreja não encontrada' }
+
+    // 1. Atualizar dados básicos (filtrando pelo church_id para segurança extra)
     const { error: memberError } = await supabase
       .from('members')
       .update({ 
@@ -86,6 +93,7 @@ export async function updateMember(id: string, formData: FormData) {
         role_id: role_id || null
       })
       .eq('id', id)
+      .eq('church_id', profile.church_id)
 
     if (memberError) {
       console.error('Erro ao atualizar membro:', memberError)
@@ -115,16 +123,29 @@ export async function updateMember(id: string, formData: FormData) {
   }
 }
 
-export async function deleteMember(id: string): Promise<void> {
+export async function deleteMember(id: string): Promise<{ success?: boolean, error?: string } | void> {
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('members').delete().eq('id', id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Não autenticado' }
+
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+    if (!profile?.church_id) return { error: 'Igreja não encontrada' }
+
+    const { error } = await supabase
+      .from('members')
+      .delete()
+      .eq('id', id)
+      .eq('church_id', profile.church_id)
+
     if (error) {
       console.error('Erro ao deletar membro:', error.message)
-      return
+      return { error: error.message }
     }
     revalidatePath('/members')
+    return { success: true }
   } catch (err: any) {
     console.error('Erro inesperado ao deletar membro:', err?.message || 'Erro desconhecido')
+    return { error: 'Erro inesperado' }
   }
 }
