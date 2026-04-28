@@ -1,9 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, Mail, AlertCircle, LogOut, ShieldAlert, Edit2, CheckCircle2, Lock, Plus, Search, ShieldCheck } from 'lucide-react'
+import { Building2, Mail, AlertCircle, LogOut, ShieldAlert, Edit2, CheckCircle2, Lock, Plus } from 'lucide-react'
 import { createChurchFromMaster, toggleChurchBlock, updateChurchName } from './actions'
 import { useState } from 'react'
 import { logout } from '@/app/login/actions'

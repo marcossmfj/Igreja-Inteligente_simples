@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache'
 export async function registerChurch(formData: FormData) {
   const userName = formData.get('userName') as string
   const churchName = formData.get('churchName') as string
-  const phone = formData.get('phone') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
