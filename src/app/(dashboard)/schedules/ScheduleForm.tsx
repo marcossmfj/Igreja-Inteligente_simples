@@ -39,7 +39,7 @@ export function ScheduleForm({
   defaultEventName?: string,
   defaultDate?: string,
   defaultSkillId?: string,
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement
 }) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
