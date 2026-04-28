@@ -97,6 +97,9 @@ export async function updateChurchSubscription(churchId: string, data: any) {
     const { error } = await supabaseAdmin
       .from('churches')
       .update({
+        admin_name: data.admin_name,
+        admin_phone: data.admin_phone,
+        admin_email: data.admin_email,
         plan_type: data.plan_type,
         subscription_status: data.subscription_status,
         subscription_expires_at: data.subscription_expires_at,

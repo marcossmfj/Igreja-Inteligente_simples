@@ -297,79 +297,105 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
               </div>
 
               <div className="p-10 space-y-10 bg-white">
-                <div className="grid md:grid-cols-2 gap-8">
-                  
-                  {/* Info Leads */}
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Informações do Responsável</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <Users className="h-4 w-4 text-slate-400" />
-                        <div>
-                          <p className="text-[9px] font-black text-slate-400 uppercase">Nome</p>
-                          <p className="text-sm font-bold text-slate-900">{selectedChurch.admin_name}</p>
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault()
+                    const formData = new FormData(e.currentTarget)
+                    const res = await updateChurchSubscription(selectedChurch.id, Object.fromEntries(formData))
+                    if (res.success) setSelectedChurch(null)
+                    else alert(res.error)
+                  }}
+                  className="space-y-10"
+                >
+                  <div className="grid md:grid-cols-2 gap-8">
+                    
+                    {/* Info Leads */}
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Informações do Responsável</h4>
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Nome Completo</label>
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+                            <Users className="h-4 w-4 text-slate-300" />
+                            <input 
+                              name="admin_name" 
+                              defaultValue={selectedChurch.admin_name} 
+                              className="bg-transparent border-none text-sm font-bold text-slate-900 focus:outline-none w-full"
+                              placeholder="Nome do Pastor/Líder"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase ml-1">WhatsApp</label>
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+                            <Phone className="h-4 w-4 text-slate-300" />
+                            <input 
+                              name="admin_phone" 
+                              defaultValue={selectedChurch.admin_phone} 
+                              className="bg-transparent border-none text-sm font-bold text-slate-900 focus:outline-none w-full"
+                              placeholder="(00) 00000-0000"
+                            />
+                            <a href={`https://wa.me/${selectedChurch.admin_phone?.replace(/\D/g, '')}`} target="_blank" className="text-blue-600 hover:scale-110 transition-transform">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase ml-1">E-mail de Contato</label>
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+                            <Mail className="h-4 w-4 text-slate-300" />
+                            <input 
+                              name="admin_email" 
+                              defaultValue={selectedChurch.admin_email || selectedChurch.profiles?.[0]?.email} 
+                              className="bg-transparent border-none text-sm font-bold text-slate-900 focus:outline-none w-full"
+                              placeholder="email@contato.com"
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <Phone className="h-4 w-4 text-slate-400" />
-                        <div>
-                          <p className="text-[9px] font-black text-slate-400 uppercase">WhatsApp</p>
-                          <p className="text-sm font-bold text-slate-900">{selectedChurch.admin_phone}</p>
+                    </div>
+
+                    {/* Config Assinatura */}
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gestão de Licença</h4>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Plano</label>
+                            <select name="plan_type" defaultValue={selectedChurch.plan_type} className="w-full h-11 rounded-xl bg-slate-100 border-none text-xs font-bold px-3 focus:ring-2 focus:ring-blue-500/10 outline-none">
+                              <option value="trial">Trial (Grátis)</option>
+                              <option value="mensal">Mensal (R$ 79,90)</option>
+                              <option value="anual">Anual (R$ 49,90)</option>
+                              <option value="premium">Premium / Custom</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Limite Membros</label>
+                            <input name="max_members" type="number" defaultValue={selectedChurch.max_members} className="w-full h-11 rounded-xl bg-slate-100 border-none text-xs font-bold px-3 focus:ring-2 focus:ring-blue-500/10 outline-none" />
+                          </div>
                         </div>
-                        <a href={`https://wa.me/${selectedChurch.admin_phone?.replace(/\D/g, '')}`} target="_blank" className="ml-auto text-blue-600 hover:scale-110 transition-transform">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Expiração</label>
+                          <input name="subscription_expires_at" type="date" defaultValue={selectedChurch.subscription_expires_at?.split('T')[0]} className="w-full h-11 rounded-xl bg-slate-100 border-none text-xs font-bold px-3 focus:ring-2 focus:ring-blue-500/10 outline-none" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Status do SaaS</label>
+                          <select name="subscription_status" defaultValue={selectedChurch.subscription_status} className="w-full h-11 rounded-xl bg-slate-100 border-none text-xs font-bold px-3 focus:ring-2 focus:ring-blue-500/10 outline-none">
+                            <option value="trialing">Em Teste</option>
+                            <option value="active">Ativo (Pago)</option>
+                            <option value="past_due">Atrasado</option>
+                            <option value="canceled">Cancelado</option>
+                          </select>
+                        </div>
+                        <button className="w-full h-14 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-blue-100">
+                          Salvar Todas as Alterações
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  {/* Config Assinatura */}
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gestão de Licença</h4>
-                    <form 
-                      onSubmit={async (e) => {
-                        e.preventDefault()
-                        const formData = new FormData(e.currentTarget)
-                        const res = await updateChurchSubscription(selectedChurch.id, Object.fromEntries(formData))
-                        if (res.success) setSelectedChurch(null)
-                        else alert(res.error)
-                      }}
-                      className="space-y-4"
-                    >
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-black text-slate-400 uppercase">Plano</label>
-                          <select name="plan_type" defaultValue={selectedChurch.plan_type} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3">
-                            <option value="trial">Trial (Grátis)</option>
-                            <option value="mensal">Mensal (R$ 79,90)</option>
-                            <option value="anual">Anual (R$ 49,90)</option>
-                            <option value="premium">Premium / Custom</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-black text-slate-400 uppercase">Limite Membros</label>
-                          <input name="max_members" type="number" defaultValue={selectedChurch.max_members} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3" />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 uppercase">Expiração</label>
-                        <input name="subscription_expires_at" type="date" defaultValue={selectedChurch.subscription_expires_at?.split('T')[0]} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 uppercase">Status do SaaS</label>
-                        <select name="subscription_status" defaultValue={selectedChurch.subscription_status} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3">
-                          <option value="trialing">Em Teste</option>
-                          <option value="active">Ativo (Pago)</option>
-                          <option value="past_due">Atrasado</option>
-                          <option value="canceled">Cancelado</option>
-                        </select>
-                      </div>
-                      <button className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-blue-100">
-                        Salvar Alterações
-                      </button>
-                    </form>
-                  </div>
-                </div>
+                </form>
 
                 <div className="h-px bg-slate-100 w-full" />
 
