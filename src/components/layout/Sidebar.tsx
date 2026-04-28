@@ -42,8 +42,8 @@ export function Sidebar() {
 
   // Fechar sidebar ao mudar de rota (mobile)
   useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
+    if (isOpen) setIsOpen(false)
+  }, [pathname, isOpen])
 
   return (
     <>
