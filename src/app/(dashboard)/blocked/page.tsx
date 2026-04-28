@@ -1,3 +1,5 @@
+'use client'
+
 import { LogOut, ShieldAlert } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { Button } from '@/components/ui/button'
@@ -19,7 +21,6 @@ export default function BlockedPage() {
             className="w-full" 
             variant="outline"
             onClick={async () => {
-              'use server'
               await logout()
             }}
           >

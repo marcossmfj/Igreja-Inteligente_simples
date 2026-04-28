@@ -24,7 +24,7 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  // @ts-ignore
+  // @ts-expect-error - churches é um retorno do join do supabase
   if (profile?.churches?.is_blocked && profile.role !== 'master') {
     redirect('/blocked')
   }

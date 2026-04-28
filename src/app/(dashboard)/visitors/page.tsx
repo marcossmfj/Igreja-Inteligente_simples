@@ -115,7 +115,7 @@ export default async function VisitorsPage() {
                 <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
                   <Heart className="h-5 w-5 text-red-400 animate-pulse" />
                 </div>
-                "Acolhei-vos uns aos outros, como Cristo nos acolheu"
+                &quot;Acolhei-vos uns aos outros, como Cristo nos acolheu&quot;
               </div>
             </div>
           )}
