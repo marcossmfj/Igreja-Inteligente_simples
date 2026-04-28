@@ -15,15 +15,25 @@ import {
   PlayCircle,
   Plus
 } from 'lucide-react'
-import { deleteSchedule } from './actions'
+import { deleteSchedule, markAsNotified, updateScheduleStatus } from './actions'
 import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
 import { ScheduleForm } from './ScheduleForm'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface ScheduleItem {
   id: string
   date: string
   event_name: string
+  notified_at: string | null
+  status: 'pendente' | 'confirmado' | 'recusado'
+  skill_id: string
   skills: { name: string } | null
   members: { id: string, name: string, phone: string | null } | null
 }
@@ -54,6 +64,12 @@ const skillColors: Record<string, string> = {
   'Recepção': 'bg-emerald-50 text-emerald-600',
   'Mídia': 'bg-amber-50 text-amber-600',
   'Infantil': 'bg-pink-50 text-pink-600',
+}
+
+const statusConfig = {
+  pendente: { label: 'Pendente', color: 'bg-slate-100 text-slate-500', icon: User },
+  confirmado: { label: 'Confirmado', color: 'bg-emerald-100 text-emerald-600', icon: CheckCircle2 },
+  recusado: { label: 'Recusado', color: 'bg-red-100 text-red-600', icon: AlertTriangle },
 }
 
 export function SchedulesClient({ 
@@ -125,28 +141,35 @@ function ScheduleEventCard({
   skills: Skill[],
   members: Member[]
 }) {
-  const [statuses, setStatuses] = useState<Record<string, NotificationStatus>>({})
+  const [statuses, setStatuses] = useState<Record<string, 'waiting' | 'processing' | 'completed' | 'error'>>({})
   const [isQueueRunning, setIsQueueRunning] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  const updateStatus = (id: string, status: NotificationStatus) => {
+  const updateUIStatus = (id: string, status: any) => {
     setStatuses(prev => ({ ...prev, [id]: status }))
   }
 
-  const sendNotification = (item: any) => {
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    await updateScheduleStatus(id, newStatus as any)
+  }
+
+  const sendNotification = async (item: ScheduleItem) => {
     const phone = item.members?.phone || ''
     const name = item.members?.name || ''
     const role = item.skills?.name || 'Auxiliar'
     
     if (!phone || phone.replace(/\D/g, '').length < 10) {
-      updateStatus(item.id, 'error')
+      updateUIStatus(item.id, 'error')
       return false
     }
 
     const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long' })
     const msg = encodeURIComponent(`Paz do Senhor, *${name}*!\n\nVocê foi escalado para servir como *${role}* no evento *"${eventName}"* no dia *${formattedDate}*.\n\nPodemos contar com sua presença?`);
     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
-    updateStatus(item.id, 'completed')
+    
+    // Marcar como notificado no banco
+    await markAsNotified(item.id)
+    updateUIStatus(item.id, 'completed')
     return true
   }
 
@@ -157,12 +180,12 @@ function ScheduleEventCard({
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i]
-      updateStatus(item.id, 'processing')
+      updateUIStatus(item.id, 'processing')
       
       await new Promise(resolve => setTimeout(resolve, 800))
       
-      const success = sendNotification(item)
-      if (!success) updateStatus(item.id, 'error')
+      const success = await sendNotification(item)
+      if (!success) updateUIStatus(item.id, 'error')
 
       const currentProgress = ((i + 1) / items.length) * 100
       setProgress(currentProgress)
@@ -232,23 +255,21 @@ function ScheduleEventCard({
       <div className="divide-y divide-slate-50">
         {items.map((item) => {
           const colorClass = skillColors[item.skills?.name || ''] || 'bg-slate-100 text-slate-500'
-          const status = statuses[item.id] || 'waiting'
+          const uiStatus = statuses[item.id] || 'waiting'
           const roleName = item.skills?.name || 'Auxiliar'
+          const currentStatusConfig = statusConfig[item.status] || statusConfig.pendente
+          const StatusIcon = currentStatusConfig.icon
 
           return (
             <div key={item.id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 md:px-10 hover:bg-slate-50/50 transition-all duration-300 gap-6">
               <div className="flex items-center gap-6 flex-1">
                 <div className={cn(
-                  "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0",
-                  status === 'processing' ? "bg-blue-100 text-blue-600 animate-pulse" :
-                  status === 'completed' ? "bg-emerald-100 text-emerald-600" :
-                  status === 'error' ? "bg-red-100 text-red-600" :
-                  "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500"
+                  "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 shadow-sm",
+                  uiStatus === 'processing' ? "bg-blue-100 text-blue-600 animate-pulse" :
+                  currentStatusConfig.color
                 )}>
-                  {status === 'processing' ? <Loader2 className="h-7 w-7 animate-spin" /> :
-                    status === 'completed' ? <CheckCircle2 className="h-7 w-7" /> :
-                    status === 'error' ? <AlertTriangle className="h-7 w-7" /> :
-                    <User className="h-7 w-7" />}
+                  {uiStatus === 'processing' ? <Loader2 className="h-7 w-7 animate-spin" /> :
+                    <StatusIcon className="h-7 w-7" />}
                 </div>
                 <div className="space-y-1.5">
                   <p className="font-black text-slate-900 tracking-tight text-lg leading-none">
@@ -258,54 +279,74 @@ function ScheduleEventCard({
                     <Badge className={cn("rounded-lg px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest border-none shadow-none", colorClass)}>
                       {roleName}
                     </Badge>
-                    {item.members?.phone && (
-                      <span className="text-xs text-slate-300 font-bold tracking-tight">
-                        {item.members.phone}
+                    {item.notified_at && (
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                        <MessageSquare className="h-2.5 w-2.5" />
+                        Enviado em {new Date(item.notified_at).toLocaleDateString('pt-BR')} {new Date(item.notified_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 self-end md:self-center">
-                {status === 'waiting' && (
-                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                    {item.members?.phone && (
+              <div className="flex items-center gap-4 self-end md:self-center">
+                {/* Seletor de Status de Presença - SEMPRE VISÍVEL */}
+                <div className="flex items-center gap-2">
+                  <Select value={item.status} onValueChange={(val) => handleStatusChange(item.id, val)}>
+                    <SelectTrigger className="w-[140px] rounded-xl border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest h-10 shadow-sm hover:border-blue-500 transition-all">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="confirmado">Confirmado</SelectItem>
+                      <SelectItem value="recusado">Recusado</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Opção de Substituir se estiver Recusado */}
+                  {item.status === 'recusado' && (
+                    <ScheduleForm 
+                      skills={skills}
+                      members={members}
+                      defaultEventName={eventName}
+                      defaultDate={date}
+                      defaultSkillId={item.skill_id}
+                      trigger={
+                        <Button variant="outline" className="h-10 px-4 rounded-xl border-red-100 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all">
+                          Substituir
+                        </Button>
+                      }
+                    />
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {uiStatus === 'waiting' && item.members?.phone && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-all">
                       <Button
                         onClick={() => sendNotification(item)}
-                        className="flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl bg-slate-900 text-white hover:bg-blue-600 shadow-slate-200"
+                        className="flex items-center gap-2 h-10 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl bg-slate-900 text-white hover:bg-blue-600 shadow-slate-200"
                       >
                         <MessageSquare className="h-4 w-4" /> Notificar
                       </Button>
-                    )}
-                    <form action={deleteSchedule.bind(null, item.id)}>
-                      <button 
-                        type="submit" 
-                        className="h-12 w-12 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100/50"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </form>
-                  </div>
-                )}
-                
-                {status === 'processing' && (
-                  <Badge className="bg-blue-50 text-blue-600 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                    Processando...
-                  </Badge>
-                )}
+                    </div>
+                  )}
+                  
+                  {uiStatus === 'processing' && (
+                    <Badge className="bg-blue-50 text-blue-600 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest animate-pulse h-10 flex items-center">
+                      Processando...
+                    </Badge>
+                  )}
 
-                {status === 'completed' && (
-                  <Badge className="bg-emerald-50 text-emerald-600 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest gap-2">
-                    <CheckCircle2 className="h-3 w-3" /> Enviado ✅
-                  </Badge>
-                )}
-
-                {status === 'error' && (
-                  <Badge className="bg-red-50 text-red-600 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest gap-2">
-                    <AlertTriangle className="h-3 w-3" /> Erro ⚠️
-                  </Badge>
-                )}
+                  <form action={deleteSchedule.bind(null, item.id)}>
+                    <button 
+                      type="submit" 
+                      className="h-10 w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100/50"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           )

@@ -103,3 +103,35 @@ export async function deleteSchedule(id: string): Promise<void> {
     console.error('Erro inesperado ao deletar escala:', err?.message || 'Erro desconhecido')
   }
 }
+
+export async function markAsNotified(id: string) {
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase
+      .from('schedules')
+      .update({ notified_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/schedules')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message }
+  }
+}
+
+export async function updateScheduleStatus(id: string, status: 'pending' | 'confirmed' | 'declined') {
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase
+      .from('schedules')
+      .update({ status })
+      .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/schedules')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message }
+  }
+}

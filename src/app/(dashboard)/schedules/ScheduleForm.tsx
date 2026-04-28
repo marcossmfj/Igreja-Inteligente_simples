@@ -31,18 +31,20 @@ export function ScheduleForm({
   members,
   defaultEventName,
   defaultDate,
+  defaultSkillId,
   trigger
 }: { 
   skills: Skill[], 
   members: Member[],
   defaultEventName?: string,
   defaultDate?: string,
+  defaultSkillId?: string,
   trigger?: React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [selectedSkill, setSelectedSkill] = useState<string>('')
+  const [selectedSkill, setSelectedSkill] = useState<string>(defaultSkillId || '')
 
   const filteredMembers = members.filter(member => 
     !selectedSkill || member.member_skills.some(ms => ms.skill_id === selectedSkill)
@@ -58,7 +60,7 @@ export function ScheduleForm({
       setError(result.error)
     } else {
       setOpen(false)
-      setSelectedSkill('')
+      if (!defaultSkillId) setSelectedSkill('')
     }
   }
 
@@ -67,7 +69,7 @@ export function ScheduleForm({
       setOpen(isOpen)
       if (!isOpen) {
         setError(null)
-        setSelectedSkill('')
+        if (!defaultSkillId) setSelectedSkill('')
       }
     }}>
       <DialogTrigger
