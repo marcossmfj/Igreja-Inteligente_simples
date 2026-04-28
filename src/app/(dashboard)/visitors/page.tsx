@@ -57,7 +57,7 @@ export default async function VisitorsPage() {
                       <tbody className="divide-y divide-slate-50">
                         {visitors.map((visitor) => {
                           const cleanPhone = visitor.phone.replace(/\D/g, '')
-                          const message = encodeURIComponent(`Olá, *${visitor.name}*! 👋\n\nQue alegria ter você conosco hoje na nossa igreja! ⛪\n\nEsperamos que tenha se sentido em casa e que a mensagem tenha falado ao seu coração. 💖\n\nSe precisar de qualquer coisa ou quiser saber mais sobre nossas atividades, estamos aqui para te acolher. Deus te abençoe muito! 🙌`)
+                          const message = encodeURIComponent(`Olá, *${visitor.name}*! 👋\n\nQue alegria ter você conosco em nossa igreja! ⛪\n\nEsperamos que tenha se sentido em casa e que a mensagem tenha falado ao seu coração. 💖\n\nSe precisar de qualquer coisa ou quiser saber mais sobre nossas atividades, estamos aqui para te acolher. Deus te abençoe muito! 🙌`)
                           const waLink = `https://wa.me/55${cleanPhone}?text=${message}`
 
                           return (
