@@ -144,7 +144,7 @@ function ScheduleEventCard({
     }
 
     const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long' })
-    const msg = encodeURIComponent(`Paz do Senhor, *${name}*! ✨\n\nVocê foi escalado para servir como *${role}* no evento *"${eventName}"* no dia *${formattedDate}*.\n\nPodemos contar com sua presença? 🙏`);
+    const msg = encodeURIComponent(`Paz do Senhor, *${name}*! \u2728\n\nVocê foi escalado para servir como *${role}* no evento *"${eventName}"* no dia *${formattedDate}*.\n\nPodemos contar com sua presença? \uD83D\uDE4F`);
     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
     updateStatus(item.id, 'completed')
     return true
