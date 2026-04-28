@@ -22,11 +22,26 @@ export default async function MasterPanel() {
     redirect('/')
   }
 
-  // 3. Listar igrejas existentes
+  // 3. Listar igrejas existentes com contagens (usando subqueries)
+  // Nota: PostgREST permite contar registros relacionados em uma única query
   const { data: churches } = await supabase
     .from('churches')
-    .select('*, profiles(email)')
+    .select(`
+      *,
+      profiles(email),
+      member_count:members(count),
+      schedule_count:schedules(count),
+      visitor_count:visitors(count)
+    `)
     .order('created_at', { ascending: false })
 
-  return <MasterPanelClient churches={(churches as any) || []} />
+  // Formatar as contagens que o Supabase retorna como arrays/objetos
+  const formattedChurches = churches?.map(c => ({
+    ...c,
+    member_count: (c.member_count as any)?.[0]?.count || 0,
+    schedule_count: (c.schedule_count as any)?.[0]?.count || 0,
+    visitor_count: (c.visitor_count as any)?.[0]?.count || 0
+  }))
+
+  return <MasterPanelClient churches={formattedChurches || []} />
 }

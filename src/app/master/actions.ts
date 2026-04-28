@@ -28,40 +28,22 @@ export async function createChurchFromMaster(formData: FormData) {
 
     if (authError) {
       if (authError.message.includes('already') || authError.status === 422) {
-        console.log('Usuário já existe no Auth, buscando ou criando perfil...')
-        
-        // Busca o perfil de forma segura (maybeSingle não dá erro se não achar nada)
-        const { data: existingProfile, error: searchError } = await supabaseAdmin
+        // Busca o perfil de forma segura
+        const { data: existingProfile } = await supabaseAdmin
           .from('profiles')
           .select('id')
           .eq('email', adminEmail)
           .maybeSingle()
         
-        if (searchError) {
-          console.error('Erro ao buscar perfil:', searchError)
-          return { error: 'Erro ao buscar perfil: ' + (searchError?.message || 'Erro desconhecido') }
-        }
-
         if (existingProfile) {
           userId = existingProfile.id
         } else {
-          // CASO ESPECIAL: Usuário existe no Auth mas não no Profiles
-          // Vamos tentar buscar o ID dele no Auth para criar o perfil
-          const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+          const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
           const authUserRecord = users.find(u => u.email === adminEmail)
-          
-          if (listError || !authUserRecord) {
-            console.error('Usuário existe mas perfil inacessível:', listError)
-            return { error: 'Usuário existe mas seu perfil está inacessível. Tente usar outro e-mail.' }
-          }
-          
-          userId = authUserRecord.id
-          // Cria o perfil faltante
-          await supabaseAdmin.from('profiles').insert({ id: userId, email: adminEmail })
+          if (authUserRecord) userId = authUserRecord.id
         }
       } else {
-        console.error('Erro no Auth ao criar usuário:', authError)
-        return { error: 'Erro no Auth: ' + (authError?.message || 'Erro desconhecido') }
+        return { error: 'Erro no Auth: ' + authError.message }
       }
     }
 
@@ -70,37 +52,26 @@ export async function createChurchFromMaster(formData: FormData) {
     // 2. Criar a igreja
     const { data: church, error: churchError } = await supabaseAdmin
       .from('churches')
-      .insert({ name: churchName })
+      .insert({ 
+        name: churchName,
+        admin_email: adminEmail,
+        subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      })
       .select()
       .single()
 
-    if (churchError) {
-      console.error('Erro ao criar igreja:', churchError)
-      return { error: 'Erro ao criar igreja: ' + (churchError?.message || 'Erro desconhecido') }
-    }
+    if (churchError) return { error: 'Erro ao criar igreja: ' + churchError.message }
 
     // 3. Vincular o usuário à igreja
-    console.log('Vinculando igreja', church.id, 'ao usuário', userId)
-    
-    const { error: profileError } = await supabaseAdmin
+    await supabaseAdmin
       .from('profiles')
-      .update({ 
-        church_id: church.id, 
-        role: 'admin' 
-      })
-      .or(`id.eq.${userId},email.eq.${adminEmail}`) // Tenta pelo ID ou pelo E-mail
-
-    if (profileError) {
-      console.error('Erro ao vincular perfil:', profileError)
-      return { error: 'Erro ao vincular perfil: ' + (profileError?.message || 'Erro desconhecido') }
-    }
+      .update({ church_id: church.id, role: 'admin' })
+      .eq('id', userId)
 
     revalidatePath('/master')
     return { success: true }
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Erro desconhecido'
-    console.error('CRASH NA AÇÃO createChurchFromMaster:', e)
-    return { error: 'Erro crítico no servidor: ' + message }
+    return { error: 'Erro crítico: ' + (e instanceof Error ? e.message : 'Erro desconhecido') }
   }
 }
 
@@ -116,7 +87,28 @@ export async function toggleChurchBlock(churchId: string, isBlocked: boolean) {
     revalidatePath('/master')
     return { success: true }
   } catch (e: any) {
-    console.error('Erro ao alternar bloqueio da igreja:', e.message)
+    return { error: e.message }
+  }
+}
+
+export async function updateChurchSubscription(churchId: string, data: any) {
+  try {
+    const supabaseAdmin = createAdminClient()
+    const { error } = await supabaseAdmin
+      .from('churches')
+      .update({
+        plan_type: data.plan_type,
+        subscription_status: data.subscription_status,
+        subscription_expires_at: data.subscription_expires_at,
+        max_members: parseInt(data.max_members),
+        internal_notes: data.internal_notes
+      })
+      .eq('id', churchId)
+
+    if (error) throw error
+    revalidatePath('/master')
+    return { success: true }
+  } catch (e: any) {
     return { error: e.message }
   }
 }
@@ -133,7 +125,23 @@ export async function updateChurchName(churchId: string, name: string) {
     revalidatePath('/master')
     return { success: true }
   } catch (e: any) {
-    console.error('Erro ao atualizar nome da igreja:', e.message)
+    return { error: e.message }
+  }
+}
+
+export async function deleteChurchData(churchId: string) {
+  try {
+    const supabaseAdmin = createAdminClient()
+    // Isso vai disparar o ON DELETE CASCADE para as outras tabelas
+    const { error } = await supabaseAdmin
+      .from('churches')
+      .delete()
+      .eq('id', churchId)
+
+    if (error) throw error
+    revalidatePath('/master')
+    return { success: true }
+  } catch (e: any) {
     return { error: e.message }
   }
 }

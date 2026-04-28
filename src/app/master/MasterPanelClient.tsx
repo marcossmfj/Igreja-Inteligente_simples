@@ -1,12 +1,25 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Building2, Mail, AlertCircle, LogOut, ShieldAlert, Edit2, CheckCircle2, Lock, Plus } from 'lucide-react'
-import { createChurchFromMaster, toggleChurchBlock, updateChurchName } from './actions'
-import { useState } from 'react'
+import { 
+  Building2, Mail, AlertCircle, LogOut, ShieldAlert, Edit2, 
+  CheckCircle2, Lock, Plus, Users, Calendar, TrendingUp, 
+  DollarSign, Settings2, Trash2, Phone, ExternalLink, MoreVertical,
+  Clock, ShieldCheck, Zap
+} from 'lucide-react'
+import { createChurchFromMaster, toggleChurchBlock, updateChurchName, updateChurchSubscription, deleteChurchData } from './actions'
+import { useState, useMemo } from 'react'
 import { logout } from '@/app/login/actions'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface Church {
   id: string
@@ -17,269 +30,378 @@ interface Church {
   admin_phone?: string
   admin_email?: string
   subscription_expires_at?: string
-  profiles?: { email: string }[]
+  plan_type?: 'trial' | 'mensal' | 'anual' | 'premium'
+  subscription_status?: 'active' | 'trialing' | 'past_due' | 'blocked' | 'canceled'
+  max_members?: number
+  internal_notes?: string
+  member_count?: number
+  schedule_count?: number
+  visitor_count?: number
 }
 
-export default function MasterPanelClient({ churches }: { churches: Church[] }) {
+export default function MasterPanelClient({ churches }: { churches: any[] }) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editName, setEditName] = useState('')
+  const [selectedChurch, setSelectedChurch] = useState<Church | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  async function handleSubmit(formData: FormData) {
+  // Métricas do Topo
+  const stats = useMemo(() => {
+    const active = churches.filter(c => !c.is_blocked).length
+    const totalMembers = churches.reduce((acc, c) => acc + (c.member_count || 0), 0)
+    const trialing = churches.filter(c => c.subscription_status === 'trialing').length
+    const revenue = churches.reduce((acc, c) => {
+      if (c.plan_type === 'mensal') return acc + 79.90
+      if (c.plan_type === 'anual') return acc + 49.90
+      return acc
+    }, 0)
+
+    return [
+      { label: 'Igrejas Ativas', value: active, icon: Building2, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { label: 'Total Membros', value: totalMembers, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+      { label: 'Novos Trials', value: trialing, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { label: 'MRR Estimado', value: `R$ ${revenue.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    ]
+  }, [churches])
+
+  const filteredChurches = churches.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.admin_email?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  async function handleCreateChurch(formData: FormData) {
     setLoading(true)
     setError(null)
-    try {
-      const result = await createChurchFromMaster(formData)
-      if (result?.error) {
-        setError(result.error)
-      } else {
-        const form = document.querySelector('form') as HTMLFormElement
-        form?.reset()
-      }
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Erro desconhecido'
-      setError('Erro inesperado: ' + message)
-    } finally {
-      setLoading(false)
-    }
+    const result = await createChurchFromMaster(formData)
+    setLoading(false)
+    if (result?.error) setError(result.error)
+    else (document.querySelector('form') as HTMLFormElement)?.reset()
   }
 
   async function handleToggleBlock(church: Church) {
-    if (!confirm(`Deseja realmente ${church.is_blocked ? 'DESBLOQUEAR' : 'BLOQUEAR'} o acesso desta igreja?`)) return
-    const result = await toggleChurchBlock(church.id, church.is_blocked)
-    if (result.error) alert(result.error)
-  }
-
-  async function handleUpdateName(id: string) {
-    const result = await updateChurchName(id, editName)
-    if (result.error) alert(result.error)
-    else setEditingId(null)
+    if (!confirm(`Confirmar alteração de bloqueio para ${church.name}?`)) return
+    await toggleChurchBlock(church.id, church.is_blocked)
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-8 md:p-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      <div className="max-w-7xl mx-auto space-y-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <h1 className="text-5xl font-black text-slate-900 tracking-tighter leading-none">Painel Master</h1>
-              <Badge className="bg-amber-100 text-amber-700 border-none rounded-lg text-[10px] font-black uppercase tracking-widest px-3">Root Access</Badge>
+    <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+      <div className="max-w-7xl mx-auto space-y-10">
+        
+        {/* Header Profissional */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-5">
+            <div className="h-16 w-16 rounded-3xl bg-slate-900 flex items-center justify-center shadow-2xl shadow-slate-200">
+              <ShieldCheck className="h-8 w-8 text-white" />
             </div>
-            <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em]">Governança Global da Plataforma</p>
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-slate-900 tracking-tighter">Central Master</h1>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-blue-50 text-blue-600 border-none rounded-md text-[10px] font-black uppercase tracking-widest px-2">v2.0 Admin</Badge>
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Plataforma Igreja Inteligente</span>
+              </div>
+            </div>
           </div>
-          <button 
-            onClick={() => logout()} 
-            className="group flex items-center px-6 py-4 text-xs font-black uppercase tracking-widest text-red-400 bg-white border border-slate-100 rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all shadow-xl shadow-slate-200/50"
-          >
-            <LogOut className="mr-3 h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Encerrar Sessão Master
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => logout()}
+              className="px-6 py-3 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all border border-slate-100 flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" /> Sair do Painel
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-[450px_1fr]">
-          {/* Formulário */}
-          <div className="space-y-8">
-            <Card className="border-none shadow-2xl shadow-slate-200/60 rounded-[3rem] bg-white overflow-hidden">
-              <CardHeader className="p-10 pb-2">
-                <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Nova Igreja</CardTitle>
-                <CardDescription className="text-slate-400 font-medium font-medium">Provisionamento de nova instância.</CardDescription>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((s, i) => (
+            <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white">
+              <CardContent className="p-8">
+                <div className="flex justify-between items-start">
+                  <div className={cn("p-4 rounded-2xl", s.bg)}>
+                    <s.icon className={cn("h-6 w-6", s.color)} />
+                  </div>
+                  <TrendingUp className="h-4 w-4 text-slate-200" />
+                </div>
+                <div className="mt-6 space-y-1">
+                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">{s.label}</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{s.value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid gap-10 lg:grid-cols-[400px_1fr]">
+          
+          {/* Coluna Esquerda: Cadastro Rápido */}
+          <div className="space-y-6">
+            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <Plus className="h-5 w-5 text-blue-500" /> Novo Cliente
+                </CardTitle>
+                <CardDescription className="text-slate-400 font-medium">Provisione uma nova igreja instantaneamente.</CardDescription>
               </CardHeader>
-              <CardContent className="p-10 pt-6">
-                <form action={handleSubmit} className="space-y-6">
-                  {error && (
-                    <div className="p-4 text-sm bg-red-50 text-red-600 rounded-2xl flex items-center gap-3 border border-red-100 font-bold animate-in fade-in zoom-in duration-300">
-                      <AlertCircle className="h-5 w-5 shrink-0" />
-                      {error}
-                    </div>
-                  )}
-                  
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nome da Igreja</label>
-                    <div className="relative group">
-                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
-                      <input
-                        name="churchName"
-                        className="w-full pl-11 h-14 rounded-2xl border-slate-200/60 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-sm"
-                        placeholder="Ex: Igreja Central"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+              <CardContent className="p-8 pt-2">
+                <form action={handleCreateChurch} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Instituição</label>
+                    <input name="churchName" placeholder="Nome da Igreja" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none transition-all" required />
                   </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">E-mail do Administrador</label>
-                    <div className="relative group">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
-                      <input
-                        name="adminEmail"
-                        type="email"
-                        className="w-full pl-11 h-14 rounded-2xl border-slate-200/60 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-sm"
-                        placeholder="pastor@igreja.com"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Admin Email</label>
+                    <input name="adminEmail" type="email" placeholder="email@igreja.com" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none transition-all" required />
                   </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Senha Inicial</label>
-                    <div className="relative group">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
-                      <input
-                        name="adminPassword"
-                        type="password"
-                        className="w-full pl-11 h-14 rounded-2xl border-slate-200/60 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-sm"
-                        placeholder="••••••••"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Senha Padrão</label>
+                    <input name="adminPassword" type="password" placeholder="••••••••" className="w-full h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none transition-all" required />
                   </div>
-
                   <button 
-                    type="submit" 
-                    className="w-full h-14 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-50" 
                     disabled={loading}
+                    className="w-full h-14 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
                   >
-                    {loading ? 'Processando...' : <><Plus className="inline h-4 w-4 mr-2" /> Criar Igreja</>}
+                    {loading ? 'Criando...' : 'Finalizar Cadastro'}
                   </button>
                 </form>
               </CardContent>
             </Card>
+
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-xs font-bold flex items-center gap-3">
+                <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+              </div>
+            )}
           </div>
 
-          {/* Listagem */}
+          {/* Coluna Direita: Listagem e Gestão */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="font-black text-slate-900 tracking-tight text-xl">Instâncias Ativas</h3>
-              <Badge variant="outline" className="rounded-lg bg-slate-50 text-[10px] font-bold border-slate-100 uppercase tracking-widest px-3 py-1">
-                {churches?.length} igrejas
-              </Badge>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+              <div className="relative w-full md:w-96 group">
+                <input 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Pesquisar igreja, email ou lead..."
+                  className="w-full h-12 rounded-2xl border-slate-100 bg-white px-11 text-sm font-medium shadow-sm focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                />
+                <Settings2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="h-10 px-4 rounded-xl bg-white border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-widest">{filteredChurches.length} Clientes</Badge>
+              </div>
             </div>
 
-            <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-[3rem] overflow-hidden bg-white">
-              <CardContent className="p-0">
-                <div className="overflow-x-auto scrollbar-hide">
-                  <div className="min-w-[800px] lg:min-w-full">
-                    <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-50 bg-slate-50/50">
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Instituição / Lead</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contato</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Validade</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Controles</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {churches?.map((church) => (
-                        <tr key={church.id} className={cn("group hover:bg-slate-50/50 transition-all duration-300", church.is_blocked && "bg-red-50/30")}>
-                          <td className="px-8 py-6">
-                            {church.is_blocked ? (
-                              <Badge variant="destructive" className="bg-red-100 text-red-600 border-none rounded-lg text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
-                                Bloqueada
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-emerald-50 text-emerald-600 border-none rounded-lg text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
-                                Ativa
-                              </Badge>
-                            )}
-                          </td>
-                          <td className="px-8 py-6">
-                            {editingId === church.id ? (
-                              <div className="flex items-center gap-2">
-                                <input 
-                                  value={editName} 
-                                  onChange={(e) => setEditName(e.target.value)}
-                                  className="h-10 rounded-xl border border-blue-200 px-4 text-sm font-bold bg-blue-50/30 focus:outline-none"
-                                  autoFocus
-                                />
-                                <button 
-                                  onClick={() => handleUpdateName(church.id)}
-                                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-200"
-                                >
-                                  <CheckCircle2 className="h-5 w-5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-3">
-                                  <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors shrink-0">
-                                    <Building2 className="h-4 w-4" />
-                                  </div>
-                                  <span className="font-black text-slate-900 text-base">{church.name}</span>
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase ml-11">
-                                  Resp: {church.admin_name || 'Não informado'} 
-                                  <span className="mx-2">•</span> 
-                                  Cad: {new Date(church.created_at).toLocaleDateString('pt-BR')}
-                                </p>
-                              </div>
-                            )}
-                          </td>
+            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white overflow-hidden">
+              <div className="overflow-x-auto scrollbar-hide">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-50 bg-slate-50/30">
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Instituição & Lead</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Saúde / Uso</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Plano & Status</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {filteredChurches.map((church) => {
+                      const memberLimitPerc = ((church.member_count || 0) / (church.max_members || 50)) * 100
+                      const isNearLimit = memberLimitPerc > 90
+
+                      return (
+                        <tr key={church.id} className="group hover:bg-slate-50/50 transition-all duration-300">
                           <td className="px-8 py-6">
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-slate-600">
-                                <Mail className="h-3.5 w-3.5" />
-                                <span className="text-xs font-bold">{church.admin_email || church.profiles?.[0]?.email || 'Sem email'}</span>
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "h-10 w-10 rounded-2xl flex items-center justify-center transition-all",
+                                  church.is_blocked ? "bg-red-50 text-red-400" : "bg-blue-50 text-blue-600"
+                                )}>
+                                  <Building2 className="h-5 w-5" />
+                                </div>
+                                <span className="font-black text-slate-900 text-base tracking-tight">{church.name}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-slate-400">
-                                <span className="text-[10px] font-black text-blue-500 uppercase">{church.admin_phone || 'S/ Telefone'}</span>
-                              </div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase ml-[52px]">
+                                {church.admin_name || 'Sem Nome'} <span className="mx-2 opacity-30">•</span> {church.admin_email || 'Sem Email'}
+                              </p>
                             </div>
                           </td>
                           <td className="px-8 py-6">
-                            <div className="flex flex-col">
-                              <span className={cn(
-                                "text-xs font-black",
-                                church.subscription_expires_at && new Date(church.subscription_expires_at) < new Date() 
-                                  ? "text-red-500" 
-                                  : "text-slate-700"
-                              )}>
-                                {church.subscription_expires_at 
-                                  ? new Date(church.subscription_expires_at).toLocaleDateString('pt-BR') 
-                                  : '---'}
-                              </span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Vencimento</span>
+                            <div className="max-w-[120px] mx-auto space-y-2">
+                              <div className="flex justify-between text-[9px] font-black uppercase">
+                                <span className={isNearLimit ? "text-red-500" : "text-slate-400"}>Membros</span>
+                                <span className="text-slate-900">{church.member_count || 0}/{church.max_members || 50}</span>
+                              </div>
+                              <Progress value={memberLimitPerc} className={cn("h-1.5", isNearLimit ? "bg-red-100" : "bg-slate-100")} />
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center gap-2">
+                                <Badge className={cn(
+                                  "border-none rounded-lg text-[9px] font-black uppercase tracking-widest px-2 py-0.5",
+                                  church.plan_type === 'anual' ? "bg-purple-100 text-purple-600" :
+                                  church.plan_type === 'mensal' ? "bg-emerald-100 text-emerald-600" : "bg-blue-100 text-blue-600"
+                                )}>
+                                  {church.plan_type || 'Trial'}
+                                </Badge>
+                                <span className={cn(
+                                  "h-2 w-2 rounded-full",
+                                  church.is_blocked ? "bg-red-400 animate-pulse" : "bg-emerald-400"
+                                )} />
+                              </div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                Expira: {church.subscription_expires_at ? new Date(church.subscription_expires_at).toLocaleDateString('pt-BR') : 'N/A'}
+                              </p>
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">
-                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <button 
-                                onClick={() => {
-                                  setEditingId(church.id)
-                                  setEditName(church.name)
-                                }}
-                                className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-white hover:text-blue-600 hover:shadow-xl transition-all"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => handleToggleBlock(church)}
-                                className={cn(
-                                  "h-10 w-10 flex items-center justify-center rounded-xl transition-all",
-                                  church.is_blocked 
-                                    ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white" 
-                                    : "bg-red-50 text-red-500 hover:bg-red-600 hover:text-white"
-                                )}
-                              >
-                                <ShieldAlert className="h-4 w-4" />
-                              </button>
-                            </div>
+                            <button 
+                              onClick={() => setSelectedChurch(church)}
+                              className="h-10 w-10 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all inline-flex items-center justify-center border border-slate-100"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </button>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
-              </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Modal de Gestão Detalhada (Central) */}
+      <Dialog open={!!selectedChurch} onOpenChange={() => setSelectedChurch(null)}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+          {selectedChurch && (
+            <div className="flex flex-col">
+              <div className="bg-slate-900 p-10 text-white">
+                <DialogHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                          <Building2 className="h-6 w-6 text-blue-400" />
+                        </div>
+                        <DialogTitle className="text-3xl font-black tracking-tighter uppercase">{selectedChurch.name}</DialogTitle>
+                      </div>
+                      <p className="text-slate-400 font-medium ml-[60px]">ID: {selectedChurch.id}</p>
+                    </div>
+                    <Badge className={selectedChurch.is_blocked ? "bg-red-500" : "bg-emerald-500"}>
+                      {selectedChurch.is_blocked ? 'BLOQUEADA' : 'ATIVA'}
+                    </Badge>
+                  </div>
+                </DialogHeader>
+              </div>
+
+              <div className="p-10 space-y-10 bg-white">
+                <div className="grid md:grid-cols-2 gap-8">
+                  
+                  {/* Info Leads */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Informações do Responsável</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <Users className="h-4 w-4 text-slate-400" />
+                        <div>
+                          <p className="text-[9px] font-black text-slate-400 uppercase">Nome</p>
+                          <p className="text-sm font-bold text-slate-900">{selectedChurch.admin_name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <Phone className="h-4 w-4 text-slate-400" />
+                        <div>
+                          <p className="text-[9px] font-black text-slate-400 uppercase">WhatsApp</p>
+                          <p className="text-sm font-bold text-slate-900">{selectedChurch.admin_phone}</p>
+                        </div>
+                        <a href={`https://wa.me/${selectedChurch.admin_phone?.replace(/\D/g, '')}`} target="_blank" className="ml-auto text-blue-600 hover:scale-110 transition-transform">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Config Assinatura */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gestão de Licença</h4>
+                    <form 
+                      onSubmit={async (e) => {
+                        e.preventDefault()
+                        const formData = new FormData(e.currentTarget)
+                        const res = await updateChurchSubscription(selectedChurch.id, Object.fromEntries(formData))
+                        if (res.success) setSelectedChurch(null)
+                        else alert(res.error)
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">Plano</label>
+                          <select name="plan_type" defaultValue={selectedChurch.plan_type} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3">
+                            <option value="trial">Trial (Grátis)</option>
+                            <option value="mensal">Mensal (R$ 79,90)</option>
+                            <option value="anual">Anual (R$ 49,90)</option>
+                            <option value="premium">Premium / Custom</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">Limite Membros</label>
+                          <input name="max_members" type="number" defaultValue={selectedChurch.max_members} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3" />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 uppercase">Expiração</label>
+                        <input name="subscription_expires_at" type="date" defaultValue={selectedChurch.subscription_expires_at?.split('T')[0]} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 uppercase">Status do SaaS</label>
+                        <select name="subscription_status" defaultValue={selectedChurch.subscription_status} className="w-full h-10 rounded-xl bg-slate-100 border-none text-xs font-bold px-3">
+                          <option value="trialing">Em Teste</option>
+                          <option value="active">Ativo (Pago)</option>
+                          <option value="past_due">Atrasado</option>
+                          <option value="canceled">Cancelado</option>
+                        </select>
+                      </div>
+                      <button className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-blue-100">
+                        Salvar Alterações
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-100 w-full" />
+
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => handleToggleBlock(selectedChurch)}
+                      className={cn(
+                        "px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2",
+                        selectedChurch.is_blocked ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"
+                      )}
+                    >
+                      <ShieldAlert className="h-4 w-4" /> {selectedChurch.is_blocked ? 'Desbloquear Acesso' : 'Suspender Cliente'}
+                    </button>
+                  </div>
+                  <button 
+                    onClick={async () => {
+                      if (confirm("ATENÇÃO: Isso apagará TODOS os dados dessa igreja (membros, escalas, etc). Deseja continuar?")) {
+                        const res = await deleteChurchData(selectedChurch.id)
+                        if (res.success) setSelectedChurch(null)
+                      }
+                    }}
+                    className="px-6 py-4 rounded-2xl bg-white text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" /> Apagar Dados
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
