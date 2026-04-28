@@ -1,13 +1,13 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
-  Building2, Mail, AlertCircle, LogOut, ShieldAlert, Edit2, 
-  CheckCircle2, Lock, Plus, Users, Calendar, TrendingUp, 
+  Building2, Mail, AlertCircle, LogOut, ShieldAlert, 
+  Plus, Users, TrendingUp, 
   DollarSign, Settings2, Trash2, Phone, ExternalLink, MoreVertical,
-  Clock, ShieldCheck, Zap
+  ShieldCheck, Zap
 } from 'lucide-react'
-import { createChurchFromMaster, toggleChurchBlock, updateChurchName, updateChurchSubscription, deleteChurchData } from './actions'
+import { createChurchFromMaster, toggleChurchBlock, updateChurchSubscription, deleteChurchData } from './actions'
 import { useState, useMemo } from 'react'
 import { logout } from '@/app/login/actions'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -37,6 +36,7 @@ interface Church {
   member_count?: number
   schedule_count?: number
   visitor_count?: number
+  profiles?: { email: string }[]
 }
 
 export default function MasterPanelClient({ churches }: { churches: any[] }) {
@@ -140,7 +140,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                 <CardTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                   <Plus className="h-5 w-5 text-blue-500" /> Novo Cliente
                 </CardTitle>
-                <CardDescription className="text-slate-400 font-medium">Provisione uma nova igreja instantaneamente.</CardDescription>
+                <div className="text-sm text-slate-400 font-medium">Provisione uma nova igreja instantaneamente.</div>
               </CardHeader>
               <CardContent className="p-8 pt-2">
                 <form action={handleCreateChurch} className="space-y-5">
