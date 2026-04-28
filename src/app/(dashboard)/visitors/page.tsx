@@ -100,6 +100,7 @@ export default async function VisitorsPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
                 </CardContent>
               </Card>
             </div>

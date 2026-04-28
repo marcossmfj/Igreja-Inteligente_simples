@@ -247,6 +247,7 @@ export function MembersClient({
               </tbody>
             </table>
           </div>
+        </div>
           {filteredMembers.length === 0 && (
             <div className="py-24 text-center">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2.5rem] bg-slate-50 mb-6">

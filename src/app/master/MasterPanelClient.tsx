@@ -244,6 +244,7 @@ export default function MasterPanelClient({ churches }: { churches: Church[] }) 
                     </tbody>
                   </table>
                 </div>
+              </div>
               </CardContent>
             </Card>
           </div>
