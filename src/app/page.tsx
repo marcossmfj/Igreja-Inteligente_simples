@@ -54,7 +54,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-24 px-6 relative">
+      <section className="pt-40 pb-12 px-6 relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full -z-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-100 rounded-full blur-[120px] opacity-60 animate-pulse"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-100 rounded-full blur-[120px] opacity-60"></div>
@@ -169,9 +169,9 @@ export default function LandingPage() {
       )}
 
       {/* Social Proof / Dashboard Preview Mockup */}
-      <section className="px-6 pb-24">
+      <section className="px-6 pb-24 -mt-8 relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-slate-900 rounded-[3rem] p-4 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-800 animate-in fade-in slide-in-from-bottom-12 duration-1000">
+          <div className="bg-slate-900 rounded-[3rem] p-4 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-800 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <div className="bg-white rounded-[2.5rem] aspect-[16/9] overflow-hidden border border-slate-100 relative group">
               <div className="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-700"></div>
               {/* Representação visual simplificada do dashboard */}
