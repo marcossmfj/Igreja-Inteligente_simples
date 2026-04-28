@@ -149,7 +149,8 @@ function ScheduleEventCard({
     setStatuses(prev => ({ ...prev, [id]: status }))
   }
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = async (id: string, newStatus: string | null) => {
+    if (!newStatus) return
     await updateScheduleStatus(id, newStatus as any)
   }
 
