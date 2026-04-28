@@ -143,8 +143,8 @@ function ScheduleEventCard({
       return false
     }
 
-    const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
-    const msg = encodeURIComponent(`Olá ${name}, você está escalado para ${role} no dia ${formattedDate}. Confirma?`);
+    const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long' })
+    const msg = encodeURIComponent(`Paz do Senhor, *${name}*! ✨\n\nVocê foi escalado para servir como *${role}* no evento *"${eventName}"* no dia *${formattedDate}*.\n\nPodemos contar com sua presença? 🙏`);
     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
     updateStatus(item.id, 'completed')
     return true
