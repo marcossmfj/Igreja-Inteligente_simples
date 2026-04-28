@@ -17,6 +17,7 @@ import {
 import { deleteSchedule } from './actions'
 import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
+import { ScheduleForm } from './ScheduleForm'
 
 interface ScheduleItem {
   id: string
@@ -35,7 +36,16 @@ interface GroupedSchedules {
   }
 }
 
-type NotificationStatus = 'waiting' | 'processing' | 'completed' | 'error'
+interface Skill {
+  id: string
+  name: string
+}
+
+interface Member {
+  id: string
+  name: string
+  member_skills: { skill_id: string }[]
+}
 
 const skillColors: Record<string, string> = {
   'Som': 'bg-blue-50 text-blue-600',
@@ -45,7 +55,15 @@ const skillColors: Record<string, string> = {
   'Infantil': 'bg-pink-50 text-pink-600',
 }
 
-export function SchedulesClient({ groupedSchedules }: { groupedSchedules: GroupedSchedules }) {
+export function SchedulesClient({ 
+  groupedSchedules,
+  skills,
+  members
+}: { 
+  groupedSchedules: GroupedSchedules,
+  skills: Skill[],
+  members: Member[]
+}) {
   const dates = Object.values(groupedSchedules).sort((a, b) => a.date.localeCompare(b.date))
 
   return (
@@ -69,7 +87,9 @@ export function SchedulesClient({ groupedSchedules }: { groupedSchedules: Groupe
                 key={eventName} 
                 eventName={eventName} 
                 items={items} 
-                date={new Date(dateGroup.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} 
+                date={dateGroup.date} 
+                skills={skills}
+                members={members}
               />
             ))}
           </div>
@@ -91,7 +111,19 @@ export function SchedulesClient({ groupedSchedules }: { groupedSchedules: Groupe
   )
 }
 
-function ScheduleEventCard({ eventName, items, date }: { eventName: string, items: ScheduleItem[], date: string }) {
+function ScheduleEventCard({ 
+  eventName, 
+  items, 
+  date,
+  skills,
+  members 
+}: { 
+  eventName: string, 
+  items: ScheduleItem[], 
+  date: string,
+  skills: Skill[],
+  members: Member[]
+}) {
   const [statuses, setStatuses] = useState<Record<string, NotificationStatus>>({})
   const [isQueueRunning, setIsQueueRunning] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -110,7 +142,8 @@ function ScheduleEventCard({ eventName, items, date }: { eventName: string, item
       return false
     }
 
-    const msg = encodeURIComponent(`Olá ${name}, você está escalado para ${role} no dia ${date}. Confirma?`);
+    const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+    const msg = encodeURIComponent(`Olá ${name}, você está escalado para ${role} no dia ${formattedDate}. Confirma?`);
     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
     updateStatus(item.id, 'completed')
     return true
@@ -146,13 +179,27 @@ function ScheduleEventCard({ eventName, items, date }: { eventName: string, item
       {/* Header do Evento com Botão de Notificação */}
       <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/30">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <h3 className="font-black text-slate-900 tracking-tight text-xl uppercase">
               {eventName}
             </h3>
-            <Badge variant="outline" className="rounded-xl bg-white text-[10px] font-black border-slate-200 uppercase tracking-widest px-4 py-1.5 shadow-sm">
-              {items.length} Integrantes
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="rounded-xl bg-white text-[10px] font-black border-slate-200 uppercase tracking-widest px-4 py-1.5 shadow-sm">
+                {items.length} Integrantes
+              </Badge>
+              
+              <ScheduleForm 
+                skills={skills} 
+                members={members}
+                defaultEventName={eventName}
+                defaultDate={date}
+                trigger={
+                  <button className="h-8 w-8 rounded-lg bg-slate-900 text-white flex items-center justify-center hover:bg-blue-600 transition-all shadow-lg shadow-slate-200 group">
+                    <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                  </button>
+                }
+              />
+            </div>
           </div>
           
           <Button 

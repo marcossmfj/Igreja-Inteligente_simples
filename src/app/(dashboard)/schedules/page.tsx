@@ -48,7 +48,11 @@ export default async function SchedulesPage() {
         />
       </div>
 
-      <SchedulesClient groupedSchedules={groupedSchedules || {}} />
+      <SchedulesClient 
+        groupedSchedules={groupedSchedules || {}} 
+        skills={(skills as any) || []}
+        members={(members as any) || []}
+      />
     </div>
   )
 }

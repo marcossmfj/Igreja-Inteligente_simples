@@ -26,7 +26,19 @@ interface Member {
   member_skills: { skill_id: string }[]
 }
 
-export function ScheduleForm({ skills, members }: { skills: Skill[], members: Member[] }) {
+export function ScheduleForm({ 
+  skills, 
+  members,
+  defaultEventName,
+  defaultDate,
+  trigger
+}: { 
+  skills: Skill[], 
+  members: Member[],
+  defaultEventName?: string,
+  defaultDate?: string,
+  trigger?: React.ReactNode
+}) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -60,9 +72,11 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
     }}>
       <DialogTrigger
         render={
-          <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-            <Plus className="mr-2 h-5 w-5" /> Nova Escala
-          </Button>
+          trigger || (
+            <Button className="h-14 px-8 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+              <Plus className="mr-2 h-5 w-5" /> Nova Escala
+            </Button>
+          )
         }
       />
       <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -90,6 +104,7 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
                   id="event_name" 
                   name="event_name" 
                   placeholder="Ex: Culto de Celebração" 
+                  defaultValue={defaultEventName}
                   required 
                   className="pl-11 h-12 rounded-xl border-slate-200/60 bg-slate-50/50 focus:bg-white focus:ring-blue-500/10 transition-all font-medium"
                 />
@@ -104,6 +119,7 @@ export function ScheduleForm({ skills, members }: { skills: Skill[], members: Me
                   id="date" 
                   name="date" 
                   type="date" 
+                  defaultValue={defaultDate}
                   required 
                   className="pl-11 h-12 rounded-xl border-slate-200/60 bg-slate-50/50 focus:bg-white focus:ring-blue-500/10 transition-all font-medium"
                 />
