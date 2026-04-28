@@ -11,10 +11,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Plus, Pencil, AlertCircle, Stethoscope, Zap } from 'lucide-react'
 import { addSkill, updateSkill } from './actions'
-import { cn } from '@/lib/utils'
 
 interface Skill {
   id: string

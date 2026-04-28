@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Pencil, AlertCircle, User, Phone, Briefcase, Star } from 'lucide-react'
+import { Plus, Pencil, AlertCircle, User, Phone, Briefcase } from 'lucide-react'
 import { addMember, updateMember } from './actions'
 import { Checkbox } from '@/components/ui/checkbox'
 

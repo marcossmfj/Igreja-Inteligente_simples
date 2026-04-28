@@ -11,10 +11,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Plus, Pencil, AlertCircle, UserSquare2, ShieldCheck } from 'lucide-react'
 import { addRole, updateRole } from './actions'
-import { cn } from '@/lib/utils'
 
 interface Role {
   id: string
