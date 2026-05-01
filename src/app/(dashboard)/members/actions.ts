@@ -8,6 +8,11 @@ export async function addMember(formData: FormData) {
   try {
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
+    const email = formData.get('email') as string
+    const birth_date = formData.get('birth_date') as string
+    const baptism_date = formData.get('baptism_date') as string
+    const marital_status = formData.get('marital_status') as string
+    const status = formData.get('status') as string
     const role_id = formData.get('role_id') as string
     const skills = formData.getAll('skills') as string[]
 
@@ -36,6 +41,11 @@ export async function addMember(formData: FormData) {
       .insert({ 
         name, 
         phone, 
+        email: email || null,
+        birth_date: birth_date || null,
+        baptism_date: baptism_date || null,
+        marital_status: marital_status || null,
+        status: status || 'Ativo',
         role_id: role_id || null, 
         church_id: profile.church_id 
       })
@@ -72,6 +82,11 @@ export async function updateMember(id: string, formData: FormData) {
   try {
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
+    const email = formData.get('email') as string
+    const birth_date = formData.get('birth_date') as string
+    const baptism_date = formData.get('baptism_date') as string
+    const marital_status = formData.get('marital_status') as string
+    const status = formData.get('status') as string
     const role_id = formData.get('role_id') as string
     const skills = formData.getAll('skills') as string[]
 
@@ -90,6 +105,11 @@ export async function updateMember(id: string, formData: FormData) {
       .update({ 
         name, 
         phone, 
+        email: email || null,
+        birth_date: birth_date || null,
+        baptism_date: baptism_date || null,
+        marital_status: marital_status || null,
+        status: status || 'Ativo',
         role_id: role_id || null
       })
       .eq('id', id)

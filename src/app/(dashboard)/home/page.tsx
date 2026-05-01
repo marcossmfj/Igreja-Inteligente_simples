@@ -52,9 +52,35 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-full bg-slate-50/50 -m-8 p-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
       <div className="max-w-7xl mx-auto space-y-12 py-10">
+        
+        {/* Banner de Boas-Vindas Premium */}
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-10 md:p-14 shadow-2xl shadow-blue-900/20 group">
+          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+            <svg width="400" height="400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="white"/>
+            </svg>
+          </div>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                A Paz do Senhor, <span className="text-blue-400">{user.user_metadata?.full_name || 'Líder'}</span>! 🙏
+              </h2>
+              <p className="text-slate-300 font-medium text-lg max-w-xl leading-relaxed">
+                Bem-vindo ao futuro do seu ministério. Sua igreja agora conta com uma gestão ágil, escalas automatizadas e onboarding atrito zero.
+              </p>
+            </div>
+            <Link 
+              href="/schedules" 
+              className="inline-flex items-center justify-center gap-3 bg-blue-500 hover:bg-blue-400 text-white font-black uppercase tracking-widest text-xs px-8 py-5 rounded-2xl shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.7)] hover:-translate-y-1 transition-all duration-500 whitespace-nowrap"
+            >
+              Ver Minhas Escalas <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-3">
-          <h2 className="text-5xl font-black tracking-tighter text-slate-900 leading-none">Dashboard</h2>
-          <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em]">Gestão de Próxima Geração</p>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 leading-none">Visão Geral</h2>
+          <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em]">Métricas em tempo real</p>
         </div>
         
         <div className="grid gap-10 md:grid-cols-3">

@@ -46,6 +46,11 @@ CREATE TABLE members (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     phone TEXT,
+    email TEXT,
+    birth_date DATE,
+    baptism_date DATE,
+    marital_status TEXT CHECK (marital_status IN ('Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)')),
+    status TEXT CHECK (status IN ('Ativo', 'Inativo', 'Afastado')) DEFAULT 'Ativo',
     role_id UUID REFERENCES roles(id) ON DELETE SET NULL,
     church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

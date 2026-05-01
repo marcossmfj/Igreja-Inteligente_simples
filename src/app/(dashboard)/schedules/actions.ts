@@ -135,3 +135,45 @@ export async function updateScheduleStatus(id: string, status: 'pending' | 'conf
     return { error: err.message }
   }
 }
+
+export async function generateWhatsAppLink(id: string) {
+  try {
+    const supabase = await createClient()
+    const { data: schedule, error } = await supabase
+      .from('schedules')
+      .select('date, event_name, members(name, phone), skills(name)')
+      .eq('id', id)
+      .single()
+
+    if (error || !schedule) {
+      return { error: 'Escala não encontrada.' }
+    }
+
+    const member = schedule.members as any
+    const skill = schedule.skills as any
+
+    if (!member?.phone) {
+      return { error: `Não é possível notificar. O membro ${member?.name || ''} não possui um telefone cadastrado.` }
+    }
+
+    const phone = member.phone.replace(/\D/g, '')
+    if (phone.length < 10) {
+      return { error: 'O número de telefone cadastrado é inválido.' }
+    }
+
+    // A data salva no banco já é YYYY-MM-DD
+    const [year, month, day] = schedule.date.split('-')
+    const dateObj = new Date(Number(year), Number(month) - 1, Number(day))
+    const formattedDate = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
+
+    const msg = `Paz do Senhor, *${member.name}*! ✨\nPassando para confirmar a sua escala como *${skill?.name || 'Auxiliar'}* no nosso encontro do dia *${formattedDate}*.\nPodemos contar com você? Responda esta mensagem para confirmar sua presença! 🙏`
+    
+    // Assumindo DDI 55 para números brasileiros caso não venha formatado
+    const ddiPhone = phone.startsWith('55') ? phone : `55${phone}`
+    const link = `https://api.whatsapp.com/send?phone=${ddiPhone}&text=${encodeURIComponent(msg)}`
+
+    return { success: true, link }
+  } catch (err: any) {
+    return { error: 'Erro inesperado ao gerar link: ' + err.message }
+  }
+}

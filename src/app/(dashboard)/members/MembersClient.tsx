@@ -37,6 +37,11 @@ export interface Member {
   id: string
   name: string
   phone: string | null
+  email: string | null
+  birth_date: string | null
+  baptism_date: string | null
+  marital_status: string | null
+  status: string | null
   role_id: string | null
   roles: {
     name: string
@@ -200,12 +205,21 @@ export function MembersClient({
                     </td>
                     <td className="px-8 py-6">
                       {member.roles?.name ? (
-                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em]">
+                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] mb-1 block w-fit">
                           {member.roles.name}
                         </Badge>
                       ) : (
-                        <span className="text-slate-200 text-xs font-bold uppercase tracking-widest">Nenhum</span>
+                        <span className="text-slate-200 text-xs font-bold uppercase tracking-widest mb-1 block">Nenhum</span>
                       )}
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
+                        member.status === 'Ativo' ? 'bg-emerald-50 text-emerald-600' :
+                        member.status === 'Inativo' ? 'bg-slate-100 text-slate-500' :
+                        member.status === 'Afastado' ? 'bg-red-50 text-red-500' :
+                        'bg-slate-100 text-slate-500'
+                      )}>
+                        {member.status || 'Ativo'}
+                      </span>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex flex-wrap gap-1.5">

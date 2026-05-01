@@ -15,7 +15,7 @@ import {
   PlayCircle,
   Plus
 } from 'lucide-react'
-import { deleteSchedule, markAsNotified, updateScheduleStatus } from './actions'
+import { deleteSchedule, markAsNotified, updateScheduleStatus, generateWhatsAppLink } from './actions'
 import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
 import { ScheduleForm } from './ScheduleForm'
@@ -144,6 +144,7 @@ function ScheduleEventCard({
   const [statuses, setStatuses] = useState<Record<string, 'waiting' | 'processing' | 'completed' | 'error'>>({})
   const [isQueueRunning, setIsQueueRunning] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [sentIds, setSentIds] = useState<Set<string>>(new Set())
 
   const updateUIStatus = (id: string, status: any) => {
     setStatuses(prev => ({ ...prev, [id]: status }))
@@ -155,23 +156,25 @@ function ScheduleEventCard({
   }
 
   const sendNotification = async (item: ScheduleItem) => {
-    const phone = item.members?.phone || ''
-    const name = item.members?.name || ''
-    const role = item.skills?.name || 'Auxiliar'
+    updateUIStatus(item.id, 'processing')
     
-    if (!phone || phone.replace(/\D/g, '').length < 10) {
+    const result = await generateWhatsAppLink(item.id)
+    
+    if (result.error) {
       updateUIStatus(item.id, 'error')
+      alert(result.error)
       return false
     }
 
-    const formattedDate = new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long' })
-    const msg = encodeURIComponent(`Paz do Senhor, *${name}*!\n\nVocê foi escalado para servir como *${role}* no evento *"${eventName}"* no dia *${formattedDate}*.\n\nPodemos contar com sua presença?`);
-    window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
+    if (result.link) {
+      window.open(result.link, '_blank');
+      await markAsNotified(item.id)
+      updateUIStatus(item.id, 'completed')
+      setSentIds(prev => new Set(prev).add(item.id))
+      return true
+    }
     
-    // Marcar como notificado no banco
-    await markAsNotified(item.id)
-    updateUIStatus(item.id, 'completed')
-    return true
+    return false
   }
 
   const startBatchNotification = async () => {
@@ -322,13 +325,27 @@ function ScheduleEventCard({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {uiStatus === 'waiting' && item.members?.phone && (
-                    <div className="opacity-0 group-hover:opacity-100 transition-all">
+                  {uiStatus !== 'processing' && item.members?.phone && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-500">
                       <Button
-                        onClick={() => sendNotification(item)}
-                        className="flex items-center gap-2 h-10 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl bg-slate-900 text-white hover:bg-blue-600 shadow-slate-200"
+                        onClick={() => {
+                          if (!sentIds.has(item.id) && uiStatus !== 'completed' && !item.notified_at) {
+                            sendNotification(item)
+                          }
+                        }}
+                        disabled={sentIds.has(item.id) || uiStatus === 'completed' || !!item.notified_at}
+                        className={cn(
+                          "flex items-center gap-2 h-10 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-500 shadow-xl",
+                          sentIds.has(item.id) || uiStatus === 'completed' || !!item.notified_at
+                            ? "bg-emerald-500 text-white shadow-emerald-200 hover:bg-emerald-600 cursor-not-allowed opacity-100"
+                            : "bg-slate-900 text-white hover:bg-blue-600 shadow-slate-200"
+                        )}
                       >
-                        <MessageSquare className="h-4 w-4" /> Notificar
+                        {sentIds.has(item.id) || uiStatus === 'completed' || !!item.notified_at ? (
+                          <>Enviado ✅</>
+                        ) : (
+                          <><MessageSquare className="h-4 w-4" /> Enviar</>
+                        )}
                       </Button>
                     </div>
                   )}
