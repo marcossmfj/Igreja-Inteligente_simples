@@ -22,12 +22,12 @@ export default async function VisitorsPage() {
 
       <div className="grid gap-12 lg:grid-cols-12 px-4 md:px-0">
         <div className="lg:col-span-4">
-          <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/40 rounded-[2.5rem] bg-white overflow-hidden sticky top-10 border">
-            <CardHeader className="p-10 pb-2">
+          <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/40 rounded-3xl lg:rounded-[2.5rem] bg-white overflow-hidden sticky top-32 border">
+            <CardHeader className="p-6 md:p-10 pb-2">
               <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Nova Visita</CardTitle>
               <p className="text-slate-400 font-medium text-sm mt-1">Registre quem esteve presente hoje.</p>
             </CardHeader>
-            <CardContent className="p-10 pt-6">
+            <CardContent className="p-6 md:p-10 pt-6">
               <VisitorForm />
             </CardContent>
           </Card>
@@ -43,7 +43,7 @@ export default async function VisitorsPage() {
                 </Badge>
               </div>
               
-              <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white border">
+              <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-3xl lg:rounded-[2.5rem] overflow-hidden bg-white border">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto scrollbar-hide">
                     <div className="min-w-[800px] lg:min-w-full">
@@ -77,19 +77,19 @@ export default async function VisitorsPage() {
                                 <p className="font-black text-slate-900 tracking-tight leading-none mb-1.5">{visitor.name}</p>
                                 <p className="text-xs text-slate-400 font-bold tracking-tight">{visitor.phone}</p>
                               </td>
-                              <td className="px-8 py-6 text-right">
-                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                              <td className="px-4 md:px-8 py-6 text-right">
+                                <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0">
                                   <a 
                                     href={waLink} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="h-11 w-11 flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+                                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
                                   >
-                                    <MessageSquare className="h-5 w-5" />
+                                    <MessageSquare className="h-4 w-4" />
                                   </a>
                                   <form action={deleteVisitor.bind(null, visitor.id)}>
-                                    <button type="submit" className="h-11 w-11 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100/50">
-                                      <Trash2 className="h-5 w-5" />
+                                    <button type="submit" className="h-10 w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100/50">
+                                      <Trash2 className="h-4 w-4" />
                                     </button>
                                   </form>
                                 </div>

@@ -203,9 +203,9 @@ function ScheduleEventCard({
   }
 
   return (
-    <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/40 rounded-[2.5rem] overflow-hidden bg-white border">
+    <Card className="border-slate-200/60 shadow-2xl shadow-slate-200/40 rounded-3xl lg:rounded-[2.5rem] overflow-hidden bg-white border">
       {/* Header do Evento com Botão de Notificação */}
-      <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/30">
+      <div className="px-4 py-4 md:px-8 md:py-6 border-b border-slate-50 bg-slate-50/30">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <h3 className="font-black text-slate-900 tracking-tight text-xl uppercase">
@@ -265,15 +265,15 @@ function ScheduleEventCard({
           const StatusIcon = currentStatusConfig.icon
 
           return (
-            <div key={item.id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 md:px-10 hover:bg-slate-50/50 transition-all duration-300 gap-6">
-              <div className="flex items-center gap-6 flex-1">
+            <div key={item.id} className="group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 lg:px-10 hover:bg-slate-50/50 transition-all duration-300 gap-4 md:gap-6">
+              <div className="flex items-center gap-4 md:gap-6 flex-1">
                 <div className={cn(
-                  "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 shadow-sm",
+                  "h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 shadow-sm",
                   uiStatus === 'processing' ? "bg-blue-100 text-blue-600 animate-pulse" :
                   currentStatusConfig.color
                 )}>
-                  {uiStatus === 'processing' ? <Loader2 className="h-7 w-7 animate-spin" /> :
-                    <StatusIcon className="h-7 w-7" />}
+                  {uiStatus === 'processing' ? <Loader2 className="h-5 w-5 md:h-7 md:w-7 animate-spin" /> :
+                    <StatusIcon className="h-5 w-5 md:h-7 md:w-7" />}
                 </div>
                 <div className="space-y-1.5">
                   <p className="font-black text-slate-900 tracking-tight text-lg leading-none">
@@ -326,7 +326,7 @@ function ScheduleEventCard({
 
                 <div className="flex items-center gap-2">
                   {uiStatus !== 'processing' && item.members?.phone && (
-                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    <div className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-500">
                       <Button
                         onClick={() => {
                           if (!sentIds.has(item.id) && uiStatus !== 'completed' && !item.notified_at) {

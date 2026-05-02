@@ -23,8 +23,8 @@ export default async function MasterPanel() {
   }
 
   // 3. Listar igrejas existentes com contagens (usando subqueries)
-  // Nota: PostgREST permite contar registros relacionados em uma única query
-  const { data: churches } = await supabase
+  // Usamos supabaseAdmin para bypassar o RLS e contar corretamente para TODAS as igrejas
+  const { data: churches } = await supabaseAdmin
     .from('churches')
     .select(`
       *,

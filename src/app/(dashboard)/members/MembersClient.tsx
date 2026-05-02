@@ -238,7 +238,7 @@ export function MembersClient({
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                      <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0">
                         {member.phone && (
                           <a 
                             href={`https://wa.me/55${member.phone.replace(/\D/g, '')}`} 

@@ -19,15 +19,17 @@ export default function LandingPage() {
               Igreja<span className="text-blue-600">Inteligente</span>
             </h1>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Funcionalidades</a>
-            <a href="#pricing" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Preços</a>
+          <div className="flex items-center gap-6 md:gap-8">
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Funcionalidades</a>
+              <a href="#pricing" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Preços</a>
+            </div>
             <Link href="/login" className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">Entrar</Link>
             <a 
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full px-6 py-2.5 text-sm font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200"
+              className="hidden md:inline-flex rounded-full px-6 py-2.5 text-sm font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200"
             >
               Falar com Consultor
             </a>

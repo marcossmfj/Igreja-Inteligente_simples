@@ -84,17 +84,17 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+    <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-10">
         
         {/* Header Profissional */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-card p-8 rounded-[2.5rem] border border-border shadow-sm">
           <div className="flex items-center gap-5">
             <div className="h-16 w-16 rounded-3xl bg-slate-900 flex items-center justify-center shadow-2xl shadow-slate-200">
               <ShieldCheck className="h-8 w-8 text-white" />
             </div>
             <div className="space-y-1">
-              <h1 className="text-3xl font-black text-slate-900 tracking-tighter">Central Master</h1>
+              <h1 className="text-3xl font-black text-foreground tracking-tighter">Central Master</h1>
               <div className="flex items-center gap-2">
                 <Badge className="bg-blue-50 text-blue-600 border-none rounded-md text-[10px] font-black uppercase tracking-widest px-2">v2.0 Admin</Badge>
                 <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Plataforma Igreja Inteligente</span>
@@ -114,7 +114,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((s, i) => (
-            <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white">
+            <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-card">
               <CardContent className="p-8">
                 <div className="flex justify-between items-start">
                   <div className={cn("p-4 rounded-2xl", s.bg)}>
@@ -124,7 +124,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                 </div>
                 <div className="mt-6 space-y-1">
                   <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">{s.label}</p>
-                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{s.value}</p>
+                  <p className="text-3xl font-black text-foreground tracking-tighter">{s.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -135,9 +135,9 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
           
           {/* Coluna Esquerda: Cadastro Rápido */}
           <div className="space-y-6">
-            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white">
+            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-card">
               <CardHeader className="p-8 pb-4">
-                <CardTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <CardTitle className="text-xl font-black text-foreground tracking-tight flex items-center gap-2">
                   <Plus className="h-5 w-5 text-blue-500" /> Novo Cliente
                 </CardTitle>
                 <div className="text-sm text-slate-400 font-medium">Provisione uma nova igreja instantaneamente.</div>
@@ -158,7 +158,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                   </div>
                   <button 
                     disabled={loading}
-                    className="w-full h-14 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+                    className="w-full h-14 bg-primary text-primary-foreground rounded-2xl font-black text-[11px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                   >
                     {loading ? 'Criando...' : 'Finalizar Cadastro'}
                   </button>
@@ -190,7 +190,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
               </div>
             </div>
 
-            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white overflow-hidden">
+            <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-card overflow-hidden">
               <div className="overflow-x-auto scrollbar-hide">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -217,7 +217,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                                 )}>
                                   <Building2 className="h-5 w-5" />
                                 </div>
-                                <span className="font-black text-slate-900 text-base tracking-tight">{church.name}</span>
+                                <span className="font-black text-foreground text-base tracking-tight">{church.name}</span>
                               </div>
                               <p className="text-[10px] font-bold text-slate-400 uppercase ml-[52px]">
                                 {church.admin_name || 'Sem Nome'} <span className="mx-2 opacity-30">•</span> {church.admin_email || 'Sem Email'}
@@ -298,7 +298,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                 </DialogHeader>
               </div>
 
-              <div className="p-6 md:p-10 space-y-10 bg-white">
+              <div className="p-6 md:p-10 space-y-10 bg-card">
                 <form 
                   onSubmit={async (e) => {
                     e.preventDefault()
