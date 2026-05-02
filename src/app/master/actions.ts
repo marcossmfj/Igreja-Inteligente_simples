@@ -135,7 +135,21 @@ export async function updateChurchName(churchId: string, name: string) {
 export async function deleteChurchData(churchId: string) {
   try {
     const supabaseAdmin = createAdminClient()
-    // Isso vai disparar o ON DELETE CASCADE para as outras tabelas
+    
+    // 1. Buscar os perfis (usuários) vinculados a esta igreja
+    const { data: profiles } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('church_id', churchId)
+
+    // 2. Excluir os usuários do Auth (isso dá trigger no ON DELETE CASCADE para apagar a linha em 'profiles')
+    if (profiles && profiles.length > 0) {
+      for (const p of profiles) {
+        await supabaseAdmin.auth.admin.deleteUser(p.id)
+      }
+    }
+
+    // 3. Apagar a igreja (o ON DELETE CASCADE nas outras tabelas apagará membros, visitantes, etc)
     const { error } = await supabaseAdmin
       .from('churches')
       .delete()
