@@ -274,29 +274,31 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
 
       {/* Modal de Gestão Detalhada (Central) */}
       <Dialog open={!!selectedChurch} onOpenChange={() => setSelectedChurch(null)}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl w-[95vw] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
           {selectedChurch && (
-            <div className="flex flex-col">
-              <div className="bg-slate-900 p-10 text-white">
+            <div className="flex flex-col max-h-[90vh] overflow-y-auto scrollbar-hide">
+              <div className="bg-slate-900 p-6 md:p-10 text-white shrink-0">
                 <DialogHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-blue-400" />
+                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                    <div className="space-y-2 w-full">
+                      <div className="flex items-start gap-3">
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 mt-1">
+                          <Building2 className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
                         </div>
-                        <DialogTitle className="text-3xl font-black tracking-tighter uppercase">{selectedChurch.name}</DialogTitle>
+                        <DialogTitle className="text-xl md:text-3xl font-black tracking-tighter uppercase break-words leading-tight pr-4">
+                          {selectedChurch.name}
+                        </DialogTitle>
                       </div>
-                      <p className="text-slate-400 font-medium ml-[60px]">ID: {selectedChurch.id}</p>
+                      <p className="text-slate-400 font-medium ml-[52px] md:ml-[60px] text-xs md:text-sm break-all">ID: {selectedChurch.id}</p>
                     </div>
-                    <Badge className={selectedChurch.is_blocked ? "bg-red-500" : "bg-emerald-500"}>
+                    <Badge className={cn("shrink-0", selectedChurch.is_blocked ? "bg-red-500" : "bg-emerald-500")}>
                       {selectedChurch.is_blocked ? 'BLOQUEADA' : 'ATIVA'}
                     </Badge>
                   </div>
                 </DialogHeader>
               </div>
 
-              <div className="p-10 space-y-10 bg-white">
+              <div className="p-6 md:p-10 space-y-10 bg-white">
                 <form 
                   onSubmit={async (e) => {
                     e.preventDefault()
@@ -307,7 +309,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                   }}
                   className="space-y-10"
                 >
-                  <div className="grid md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                     
                     {/* Info Leads */}
                     <div className="space-y-4">
