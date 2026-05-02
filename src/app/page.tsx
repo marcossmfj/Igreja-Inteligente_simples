@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { registerChurch } from './actions'
 
 export default function LandingPage() {
-  const whatsappUrl = "https://wa.me/5511999999999?text=Ol%C3%A1%21%20Gostaria%20de%20conhecer%20o%20Igreja%20Inteligente."
+  const whatsappUrl = "https://wa.me/5521982580161?text=Ol%C3%A1%21%20Gostaria%20de%20assinar%20o%20plano%20do%20Igreja%20Inteligente."
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">

@@ -39,6 +39,7 @@
   "exclude": [
     "node_modules",
     "bot-tests",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "mobile-app"
   ]
 }
