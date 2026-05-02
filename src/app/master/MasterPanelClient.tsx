@@ -7,7 +7,7 @@ import {
   DollarSign, Settings2, Trash2, Phone, ExternalLink, MoreVertical,
   ShieldCheck, Zap
 } from 'lucide-react'
-import { createChurchFromMaster, toggleChurchBlock, updateChurchSubscription, deleteChurchData } from './actions'
+import { createChurchFromMaster, toggleChurchBlock, updateChurchSubscription, deleteChurchData, resetChurchAdminPassword } from './actions'
 import { useState, useMemo } from 'react'
 import { logout } from '@/app/login/actions'
 import { Badge } from '@/components/ui/badge'
@@ -81,6 +81,23 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
   async function handleToggleBlock(church: Church) {
     if (!confirm(`Confirmar alteração de bloqueio para ${church.name}?`)) return
     await toggleChurchBlock(church.id, church.is_blocked)
+  }
+
+  async function handleResetPassword(church: Church) {
+    const adminEmail = church.admin_email || church.profiles?.[0]?.email
+    if (!adminEmail) {
+      alert("Não há e-mail de administrador definido para esta igreja.")
+      return
+    }
+    const pwd = prompt(`Digite a nova senha para o admin (${adminEmail}) ou deixe em branco para "Mudar123@":`)
+    if (pwd === null) return // Canceled
+
+    const res = await resetChurchAdminPassword(adminEmail, pwd)
+    if (res.success) {
+      alert(`Senha alterada com sucesso!\nNova senha: ${res.newPassword}`)
+    } else {
+      alert(`Erro: ${res.error}`)
+    }
   }
 
   return (
@@ -402,7 +419,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                 <div className="h-px bg-slate-100 w-full" />
 
                 <div className="flex items-center justify-between">
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 flex-wrap">
                     <button 
                       type="button"
                       onClick={(e) => {
@@ -415,6 +432,16 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                       )}
                     >
                       <ShieldAlert className="h-4 w-4" /> {selectedChurch.is_blocked ? 'Desbloquear Acesso' : 'Suspender Cliente'}
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleResetPassword(selectedChurch)
+                      }}
+                      className="px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    >
+                      <Settings2 className="h-4 w-4" /> Resetar Senha
                     </button>
                   </div>
                   <button 

@@ -162,3 +162,23 @@ export async function deleteChurchData(churchId: string) {
     return { error: e.message }
   }
 }
+
+export async function resetChurchAdminPassword(adminEmail: string, newPassword?: string) {
+  try {
+    const supabaseAdmin = createAdminClient()
+    
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
+    const user = users.find(u => u.email === adminEmail)
+    
+    if (!user) return { error: 'Usuário administrador não encontrado no sistema de autenticação.' }
+
+    const pwdToSet = newPassword || 'Mudar123@'
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, { password: pwdToSet })
+    
+    if (error) throw error
+    return { success: true, newPassword: pwdToSet }
+  } catch (e: any) {
+    return { error: e.message }
+  }
+}
+
