@@ -404,7 +404,11 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                 <div className="flex items-center justify-between">
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => handleToggleBlock(selectedChurch)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleToggleBlock(selectedChurch)
+                      }}
                       className={cn(
                         "px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2",
                         selectedChurch.is_blocked ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"
@@ -414,10 +418,16 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
                     </button>
                   </div>
                   <button 
-                    onClick={async () => {
-                      if (confirm("ATENÇÃO: Isso apagará TODOS os dados dessa igreja (membros, escalas, etc). Deseja continuar?")) {
+                    type="button"
+                    onClick={async (e) => {
+                      e.preventDefault()
+                      if (window.confirm("ATENÇÃO: Isso apagará TODOS os dados dessa igreja (membros, escalas, etc). Essa ação é irreversível. Deseja continuar?")) {
                         const res = await deleteChurchData(selectedChurch.id)
-                        if (res.success) setSelectedChurch(null)
+                        if (res.success) {
+                          setSelectedChurch(null)
+                        } else {
+                          alert("Erro ao excluir: " + res.error)
+                        }
                       }
                     }}
                     className="px-6 py-4 rounded-2xl bg-white text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
