@@ -274,7 +274,7 @@ export default function MasterPanelClient({ churches }: { churches: any[] }) {
 
       {/* Modal de Gestão Detalhada (Central) */}
       <Dialog open={!!selectedChurch} onOpenChange={() => setSelectedChurch(null)}>
-        <DialogContent className="max-w-4xl w-[95vw] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-4xl w-[95vw] md:w-[90vw] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
           {selectedChurch && (
             <div className="flex flex-col max-h-[90vh] overflow-y-auto scrollbar-hide">
               <div className="bg-slate-900 p-6 md:p-10 text-white shrink-0">
